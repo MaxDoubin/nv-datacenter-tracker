@@ -363,7 +363,7 @@ export function treemap(items, fmt) {
     const pct = ((b.value / total) * 100).toFixed(1);
     const showText = b.w > 66 && b.h > 34;
     const rect = `<rect x="${b.x + 1}" y="${b.y + 1}" width="${Math.max(0, b.w - 2)}" height="${Math.max(0, b.h - 2)}"
-      rx="4" fill="${palette(i)}" fill-opacity=".72" stroke="${palette(i)}" stroke-width="1">
+      rx="4" fill="${palette(i)}" fill-opacity=".88" stroke="${palette(i)}" stroke-width="1">
       <title>${esc2(`${b.label}: ${fmt(b.value)} (${pct}% of total)`)}</title></rect>`;
     const text = showText ? `<text x="${b.x + 10}" y="${b.y + 21}" class="tm-label">${esc2(b.label.slice(0, Math.floor(b.w / 7.4))) }</text>
       <text x="${b.x + 10}" y="${b.y + 37}" class="tm-value">${esc2(fmt(b.value))}</text>` : "";

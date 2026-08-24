@@ -69,7 +69,7 @@ export function choropleth(map, values, fmt, opts = {}) {
     const [x, y] = c.centroid;
     const tip = `${c.name} County: ${fmt(v)}${detail[c.name] ? `\n${detail[c.name]}` : ""}`;
     return `<a href="${hrefBase}${encodeURIComponent(c.name)}" aria-label="${esc(tip)}">
-      <circle cx="${x}" cy="${y}" r="${r.toFixed(1)}" fill="var(--accent)" fill-opacity=".82"
+      <circle cx="${x}" cy="${y}" r="${r.toFixed(1)}" fill="var(--accent)" fill-opacity=".95"
         stroke="var(--surface)" stroke-width="2"><title>${esc(tip)}</title></circle>
       <text x="${x}" y="${y + 4}" text-anchor="middle" class="map-bubble-value">${esc(fmt(v))}</text>
     </a>`;
