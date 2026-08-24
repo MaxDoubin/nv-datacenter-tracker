@@ -1,0 +1,16 @@
+id,subject,subject_type,county,year,metric,gallons,source_id,notes
+google-storey-2023-withdrawn,Google Storey County,facility,Storey,2023,withdrawn,1900000,lcb-datacenters-2026,From Google's environmental report; the balance was cycled back into the system.
+google-storey-2023-consumed,Google Storey County,facility,Storey,2023,consumed,200000,lcb-datacenters-2026,
+google-storey-2024-withdrawn,Google Storey County,facility,Storey,2024,withdrawn,14900000,lcb-datacenters-2026,"A 7.8x increase in withdrawal over 2023."
+google-storey-2024-consumed,Google Storey County,facility,Storey,2024,consumed,1500000,lcb-datacenters-2026,"A 7.5x increase in consumption over 2023."
+google-southern-2024-used,Google southern Nevada,facility,Clark,2024,used,352000000,lcb-datacenters-2026,Reported by the Las Vegas Review-Journal. Consumptive share not disclosed.
+flexential-southern-2024-used,Flexential southern Nevada,facility,Clark,2024,used,20000000,lcb-datacenters-2026,Reported by the Las Vegas Review-Journal.
+all-southern-2024-used,All southern Nevada data centers,aggregate,Clark,2024,used,716000000,lcb-datacenters-2026,"The source memo reads ""more than 716 gallons for the year"", an apparent omission of the word million. Recorded as 716 million; needs confirmation against the Las Vegas Review-Journal original."
+keystone-planned,Centra / Keystone Data Center,facility,Washoe,2025,planned_annual,651000,lcb-datacenters-2026,City of Reno and TMRPA planning figures; converted from acre-feet by the source.
+webb-planned,Webb Data Center,facility,Washoe,2025,planned_annual,651000,lcb-datacenters-2026,City of Reno and TMRPA planning figures.
+oppidan-planned,Oppidan / Connect Data Centers,facility,Washoe,2025,planned_annual,2600000,lcb-datacenters-2026,City of Reno and TMRPA planning figures.
+benchmark-casino,Typical casino,benchmark,,2025,planned_annual,97800000,lcb-datacenters-2026,City of Reno planning comparison.
+benchmark-hospital,Typical hospital,benchmark,,2025,planned_annual,32600000,lcb-datacenters-2026,City of Reno planning comparison.
+benchmark-apartments,Affordable housing apartment complex,benchmark,,2025,planned_annual,7500000,lcb-datacenters-2026,City of Reno planning comparison.
+benchmark-household,Average American household,benchmark,,2025,planned_annual,110000,lcb-datacenters-2026,Approximately 300 gallons per day. Majority of domestic use is non-consumptive.
+benchmark-prs-threshold,Project of Regional Significance threshold,benchmark,,2025,planned_annual,203700000,lcb-datacenters-2026,"625 acre-feet per year. A project at or above this triggers TMRPA regional review under NRS 278.026-278.029."

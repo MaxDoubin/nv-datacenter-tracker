@@ -1,0 +1,6 @@
+id,finding,as_of,metric,value,unit,source_id,notes
+audits-completed,"Completed audits among active data center abatements",2025-01,audited_of_active,3,of 13,tni-dc-analysis,"Reported by The Nevada Independent. GOED audits standard, aviation and data center abatements at the two-year and five-year marks from contract signature."
+abatement-per-job,"Approved abatement per promised permanent job (data centers)",2025-01,usd_per_job,1500000,USD,tni-dc-analysis,"Compared with roughly $190,000 per job for the Tesla large investment award."
+no-revenue-tracking,"GOED does not systematically track realized tax revenues or total economic activity against projections",2025-01,tracked,0,boolean,tni-dc-analysis,"The projections published in board packets are not followed up with measured outcomes."
+construction-residency,"Construction worker residency data not released",2025-01,released,0,boolean,tni-dc-analysis,"NRS 360.754 requires that 50 percent or more of construction workers be Nevada residents, but the compliance data is not published."
+local-sut-loss,"Local government sales and use tax revenue foregone across all abatement programs",2025-01,usd,537000000,USD,gjf-datacenters,"Over eight years, statewide, all programs. Not data center specific."

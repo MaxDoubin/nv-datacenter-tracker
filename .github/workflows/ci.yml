@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Validate, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Node 24 runs the TypeScript directly. There are no dependencies to
+      # install, so there is nothing to cache and nothing to audit.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Validate dataset (strict — warnings fail too)
+        run: npm run validate:strict
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Confirm the data dictionary is committed and current
+        run: |
+          if ! git diff --quiet -- docs/DATA_DICTIONARY.md; then
+            echo "::error::docs/DATA_DICTIONARY.md is stale. Run 'npm run build' and commit the result."
+            git --no-pager diff -- docs/DATA_DICTIONARY.md
+            exit 1
+          fi
+
+      - name: Summary
+        run: npm run report >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: dist/
+          retention-days: 14

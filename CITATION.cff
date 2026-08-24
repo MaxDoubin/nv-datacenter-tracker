@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+title: Nevada Data Center Tax Abatement Tracker
+message: If you use this dataset, please cite it and link the underlying primary sources.
+type: dataset
+authors:
+  - family-names: Doubin
+    given-names: Max
+repository-code: https://github.com/MaxDoubin/nv-datacenter-tracker
+abstract: >-
+  An open, fully sourced dataset of tax abatements approved under Nevada Revised Statutes 360.754, the
+  data center abatement program created by S.B. 170 (2015). Records what each award promised in jobs,
+  wages and capital investment, what it cost in forgone sales-and-use and personal property tax, and what
+  the public record does and does not show about delivery. Includes a ledger of documented conflicts
+  between official state sources.
+keywords:
+  - Nevada
+  - data centers
+  - tax abatements
+  - tax expenditures
+  - government transparency
+  - open data
+  - NRS 360.754
+license: CC-BY-4.0
+version: 1.0.0
+date-released: "2026-08-24"

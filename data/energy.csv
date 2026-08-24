@@ -1,0 +1,11 @@
+id,subject,scope,year,metric,value,unit,source_id,notes
+nv-energy-requests,Nevada data center power requests,Nevada,2026,requested_capacity,6,gigawatts,lcb-datacenters-2026,"Roughly a dozen data centers, mainly in the Tahoe Reno Industrial Center, have requested almost six gigawatts within the next decade per NV Energy filings analyzed by MIT Technology Review. On IEA data this would make northern Nevada the second-largest market in the world by installed capacity."
+us-dc-share-2019,US data center electricity share,United States,2019,share_of_national_electricity,1.9,percent,lcb-datacenters-2026,Lawrence Berkeley National Laboratory 2024 report.
+us-dc-share-2023,US data center electricity share,United States,2023,share_of_national_electricity,4.4,percent,lcb-datacenters-2026,Lawrence Berkeley National Laboratory 2024 report.
+us-dc-share-2028-low,US data center electricity share (low scenario),United States,2028,share_of_national_electricity,6.7,percent,lcb-datacenters-2026,Projected.
+us-dc-share-2028-high,US data center electricity share (high scenario),United States,2028,share_of_national_electricity,12,percent,lcb-datacenters-2026,Projected.
+cooling-share,Cooling share of data center power use,United States,2025,share_of_facility_power,40,percent,lcb-datacenters-2026,National League of Cities fact sheet; cooling accounts for over 40 percent.
+mix-gas,Natural gas,United States,2025,share_of_dc_electricity,40,percent,lcb-datacenters-2026,IEA.
+mix-renewables,Renewables (solar PV and wind),United States,2025,share_of_dc_electricity,24,percent,lcb-datacenters-2026,IEA.
+mix-nuclear,Nuclear,United States,2025,share_of_dc_electricity,20,percent,lcb-datacenters-2026,IEA.
+mix-coal,Coal,United States,2025,share_of_dc_electricity,15,percent,lcb-datacenters-2026,IEA.

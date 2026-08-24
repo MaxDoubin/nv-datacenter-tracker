@@ -1,0 +1,59 @@
+name: Check source URLs
+
+# Government PDFs get moved and silently 404. A citation-based dataset rots
+# without this, so check weekly and open an issue when a link dies.
+
+on:
+  schedule:
+    - cron: "17 13 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Probe every source URL
+        id: probe
+        run: |
+          set +e
+          npm run check-sources --silent | tee report.txt
+          echo "exit=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Open an issue if anything is unreachable
+        if: steps.probe.outputs.exit != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('report.txt', 'utf8');
+            const title = 'Source URLs unreachable';
+            const open = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'source-rot',
+            });
+            const text = [
+              'The weekly source check found unreachable URLs.',
+              '',
+              'Each one needs either a replacement URL or a web.archive.org snapshot in `data/sources.csv`.',
+              '', '```', body.trim(), '```',
+            ].join('\n');
+            if (open.data.length) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: open.data[0].number, body: text,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title, body: text, labels: ['source-rot'],
+              });
+            }

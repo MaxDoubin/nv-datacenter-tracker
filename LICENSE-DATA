@@ -1,0 +1,26 @@
+# Data licence
+
+Everything in `data/`, and the exports generated from it, is licensed under
+**Creative Commons Attribution 4.0 International (CC BY 4.0)**.
+
+https://creativecommons.org/licenses/by/4.0/
+
+You may share and adapt the data for any purpose, including commercially, provided you give appropriate
+credit. Suggested attribution:
+
+> Nevada Data Center Tax Abatement Tracker, https://github.com/MaxDoubin/nv-datacenter-tracker (CC BY 4.0)
+
+## A note on the underlying documents
+
+The dataset is compiled from public records produced by the State of Nevada, the Nevada Legislative Counsel
+Bureau, the City of Reno and other public bodies. Those documents are public records; this compilation,
+its structure, its corrections and its documentation are the contribution licensed above.
+
+Where a figure originates in copyrighted journalism (identified in `sources.csv` by `doc_type` of `news` or
+`news-investigation`), only the underlying facts are recorded, with attribution and a link. No article text
+is reproduced.
+
+## No warranty
+
+The data is provided as is. It is compiled from documents that themselves contain errors — several are
+catalogued in `discrepancies.csv`. For anything consequential, cite the linked primary source.

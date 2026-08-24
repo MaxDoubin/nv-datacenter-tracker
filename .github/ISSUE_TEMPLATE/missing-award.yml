@@ -1,0 +1,54 @@
+name: Missing or new award
+description: An NRS 360.754 abatement that is not in the dataset yet
+title: "[award] "
+labels: ["new-award"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The dataset is known to be incomplete for FY2025 onward, because GOED's biennial reports lag board
+        approvals by up to two years. Board packets are the best source.
+  - type: input
+    id: entity
+    attributes:
+      label: Applicant entity
+      description: Exactly as it appears in the board packet, not as a news article paraphrases it.
+      placeholder: Colovore Reno 1, LLC
+    validations:
+      required: true
+  - type: input
+    id: approved
+    attributes:
+      label: Board approval date
+      placeholder: 2026-08
+    validations:
+      required: true
+  - type: input
+    id: county
+    attributes:
+      label: County
+      placeholder: Storey
+    validations:
+      required: true
+  - type: textarea
+    id: figures
+    attributes:
+      label: Figures
+      description: Whatever the source gives. Leave anything out rather than estimating it.
+      value: |
+        Capital investment:
+        Jobs promised:
+        Average wage:
+        Sales and use tax abatement:
+        Sales and use tax term (years):
+        Personal property tax abatement:
+        Personal property term (years):
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source document
+      placeholder: https://goed.nv.gov/wp-content/uploads/...
+    validations:
+      required: true

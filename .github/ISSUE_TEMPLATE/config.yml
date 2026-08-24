@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Primary sources
+    url: https://goed.nv.gov/about/public-meetings/
+    about: GOED board meeting agendas and packets — the best source for a new award.
+  - name: How this dataset is built
+    url: https://github.com/MaxDoubin/nv-datacenter-tracker/blob/main/METHODOLOGY.md
+    about: Read the sourcing hierarchy before proposing a change to a figure.
