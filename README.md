@@ -10,7 +10,10 @@ promised job**. The state does not publish whether those promises were kept.
 Every figure in this repository cites the document it came from, with a retrieval date. Where official sources
 contradict each other, both values are recorded along with the reasoning for which one is used.
 
-**Live site:** *(see [docs/DEPLOY.md](docs/DEPLOY.md) — deploys free to Cloudflare on every push)*
+**Live site: https://maxdoubin.github.io/nv-datacenter-tracker/**
+
+Deploys automatically on every push to `main`. See [docs/DEPLOY.md](docs/DEPLOY.md) to add a free
+Cloudflare deployment alongside it.
 
 ---
 
