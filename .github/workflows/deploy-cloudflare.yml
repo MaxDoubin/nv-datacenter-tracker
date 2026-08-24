@@ -1,11 +1,12 @@
 name: Deploy to Cloudflare
 
-# Optional. The simpler path is to connect this repository in the Cloudflare
-# dashboard (Workers & Pages → Create → Import a repository), which needs no
-# secrets at all. See docs/DEPLOY.md.
+# Optional, and inert until configured. The simpler path is to connect this
+# repository in the Cloudflare dashboard (Workers & Pages -> Create -> Import a
+# repository), which needs no secrets at all. See docs/DEPLOY.md.
 #
-# This workflow exists for the case where you want deploys driven by GitHub.
-# It requires two repository secrets: CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID.
+# This workflow is for driving deploys from GitHub instead. It stays green and
+# skips itself until CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID exist as
+# repository secrets, so an unconfigured deploy never shows up as a failure.
 
 on:
   push:
@@ -19,21 +20,39 @@ jobs:
   deploy:
     name: Build and deploy
     runs-on: ubuntu-latest
-    # Skip cleanly on forks and where the token has not been configured.
-    if: github.repository_owner == 'MaxDoubin'
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      # secrets are not available to job-level `if`, so gate on a step output.
+      - name: Check whether Cloudflare credentials are configured
+        id: gate
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -n "$TOKEN" ] && [ -n "$ACCOUNT" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Cloudflare secrets not set — skipping. See docs/DEPLOY.md. GitHub Pages still deploys."
+          fi
+
+      - if: steps.gate.outputs.ready == 'true'
+        uses: actions/checkout@v4
+
+      - if: steps.gate.outputs.ready == 'true'
+        uses: actions/setup-node@v4
         with:
           node-version: "24"
 
       - name: Validate before publishing
+        if: steps.gate.outputs.ready == 'true'
         run: npm run validate:strict && npm test
 
       - name: Build
+        if: steps.gate.outputs.ready == 'true'
         run: npm run build
 
       - name: Deploy
+        if: steps.gate.outputs.ready == 'true'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
