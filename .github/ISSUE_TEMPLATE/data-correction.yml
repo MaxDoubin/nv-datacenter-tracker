@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         Corrections are the most valuable contribution to this project. The one thing that is required is a
-        **source document** — without it a correction cannot be accepted, because the whole dataset rests on
+        **source document**. Without it a correction cannot be accepted, because the whole dataset rests on
         provenance.
   - type: input
     id: row
@@ -42,7 +42,7 @@ body:
       label: Source document
       description: URL, plus the page or table where the figure appears. A GOED board packet is ideal.
       placeholder: |
-        https://goed.nv.gov/wp-content/uploads/2024/01/...pdf — page 1, "Application Facts" table
+        https://goed.nv.gov/wp-content/uploads/2024/01/...pdf, page 1, "Application Facts" table
     validations:
       required: true
   - type: dropdown
@@ -51,8 +51,8 @@ body:
       label: Does another official source say something different?
       description: If so this becomes a discrepancy record rather than a straight overwrite.
       options:
-        - "No — the current value is simply an error in this dataset"
-        - "Yes — two official sources disagree"
+        - "No, the current value is simply an error in this dataset"
+        - "Yes, two official sources disagree"
         - "Not sure"
     validations:
       required: true

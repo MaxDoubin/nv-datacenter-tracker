@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: "24"
 
-      - name: Validate dataset (strict — warnings fail too)
+      - name: Validate dataset (strict, warnings fail too)
         run: npm run validate:strict
 
       - name: Test

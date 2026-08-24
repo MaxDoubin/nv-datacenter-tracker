@@ -50,7 +50,7 @@ const blocked = results.filter((r) => r.verdict === "blocked");
 
 console.log(`\n${results.length - missing.length - blocked.length}/${results.length} verified reachable.`);
 if (blocked.length) {
-  console.log(`${blocked.length} could not be checked (403/429 — bot protection or rate limiting). ` +
+  console.log(`${blocked.length} could not be checked (403/429, bot protection or rate limiting). ` +
     `Confirm by hand; these are not treated as failures.`);
 }
 if (missing.length) {

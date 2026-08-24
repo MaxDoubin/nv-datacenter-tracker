@@ -30,7 +30,7 @@ CI runs the same. A PR that fails validation will not be merged.
 1. Find the GOED board packet. They live at `goed.nv.gov/wp-content/uploads/YYYY/MM/...` and are usually
    linked from the board meeting agenda. This is the best source available.
 2. Add the source to `sources.csv`.
-3. Add the operator to `companies.csv` if new. Set `parent_confidence` honestly — `confirmed` means a
+3. Add the operator to `companies.csv` if new. Set `parent_confidence` honestly. `confirmed` means a
    primary document states it, `reported` means journalism does, `unknown` means nobody has.
 4. Add the row to `abatements.csv`. Use the entity name **as it appears in the board packet**, not as the
    biennial report transcribes it.
@@ -40,8 +40,8 @@ CI runs the same. A PR that fails validation will not be merged.
 
 ## Adding a column
 
-Columns are declared in [`src/lib/schema.ts`](src/lib/schema.ts). Add the field there — with a `doc` string,
-because the data dictionary is generated from it — then update the CSV. The validator will reject any column
+Columns are declared in [`src/lib/schema.ts`](src/lib/schema.ts). Add the field there, with a `doc` string,
+because the data dictionary is generated from it, then update the CSV. The validator will reject any column
 that is not declared, and any declared column that is missing.
 
 ## Reporting a problem without fixing it
@@ -52,6 +52,6 @@ believe is wrong and the value you believe is right. That is enough for someone 
 ## Style
 
 - Prose in data notes: plain sentences, no abbreviations that are not in the source.
-- Code: match the surrounding file. No dependencies — this is deliberate, and PRs adding one need to argue
+- Code: match the surrounding file. No dependencies. This is deliberate, and PRs adding one need to argue
   for it.
 - Commit messages: what changed and why, present tense.

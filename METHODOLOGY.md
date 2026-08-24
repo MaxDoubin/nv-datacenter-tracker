@@ -8,7 +8,7 @@ board under **NRS 360.754**, the data center abatement program created by S.B. 1
 **In scope:** every NRS 360.754 award, whether active or withdrawn.
 
 **Out of scope:** data centers abated under other programs. Apple's Washoe County facility is the notable
-example — its abatements predate the 2015 program and sit under the standard abatement (NRS 360.750). It
+example. Its abatements predate the 2015 program and sit under the standard abatement (NRS 360.750). It
 appears in `companies.csv` for context and in the City of Reno's redemption figures (which group pre-2015
 data centers together for comparability), but not in the NRS 360.754 award table. Mixing them would inflate
 the program's totals.
@@ -40,14 +40,14 @@ its own stated term gets flagged.
 
 When documents disagree, the higher tier wins and the conflict is recorded in `discrepancies.csv`:
 
-1. **GOED board packets** — the application itself, with the applicant's own figures and GOED's economic
+1. **GOED board packets.** The application itself, with the applicant's own figures and GOED's economic
    analysis. Highest authority.
-2. **GOED biennial reports to the Legislature** (NRS 231.0685) — comprehensive but, as this project
+2. **GOED biennial reports to the Legislature** (NRS 231.0685). Comprehensive but, as this project
    documents, containing transcription and formula errors.
-3. **GOED press releases** — accurate on headline figures, thin on detail.
-4. **Municipal and legislative analyses** — the City of Reno's ACFR-based redemption figures and the
+3. **GOED press releases.** Accurate on headline figures, thin on detail.
+4. **Municipal and legislative analyses.** The City of Reno's ACFR-based redemption figures and the
    Legislative Counsel Bureau's briefings are authoritative for what they measure directly.
-5. **Trade and news reporting** — used only where nothing official exists, and always flagged
+5. **Trade and news reporting.** Used only where nothing official exists, and always flagged
    `verification = secondary`.
 
 Later reports supersede earlier ones *except* where the earlier one is arithmetically verifiable and the
@@ -55,7 +55,7 @@ later one is not. See `disc-fy2016-postwithdrawal-capex`.
 
 ## Fiscal years
 
-Nevada's fiscal year runs 1 July – 30 June; FY2016 ends 30 June 2016. An award approved in July 2015 is an
+Nevada's fiscal year runs 1 July to 30 June; FY2016 ends 30 June 2016. An award approved in July 2015 is an
 FY2016 award. The validator recomputes the fiscal year from the approval date on every row and fails the
 build on a mismatch.
 
@@ -76,8 +76,8 @@ Nothing derived is stored in the CSVs. All of it is computed at build time in
 | Delivery ratios | `audited ÷ projected`, from GOED's own audit table; wage ratio is jobs-weighted |
 
 **Why 2080 hours.** Not a convention picked at random: GOED's own FY2016 rows satisfy
-`jobs × wage × 2080` to the dollar. Using it reproduces the state's arithmetic — which is also how the
-broken "Total Annual Wages" column in the FY2023–24 report was detected. A test pins this.
+`jobs × wage × 2080` to the dollar. Using it reproduces the state's arithmetic, which is also how the
+broken "Total Annual Wages" column in the FY2023 to FY2024 report was detected. A test pins this.
 
 ## What is not measured
 
@@ -85,11 +85,32 @@ broken "Total Annual Wages" column in the FY2023–24 report was detected. A tes
   not break results out by program. Promised-versus-delivered is therefore only available program-wide
   (standard + aviation + data center combined), and is labelled as such everywhere it appears.
 - **Redemptions.** *Awarded* is the ceiling; *redeemed* is what a jurisdiction actually forgave, and
-  companies may redeem at any point across a 10–20 year window. Only the City of Reno publishes it.
+  companies may redeem at any point across a 10 to 20 year window. Only the City of Reno publishes it.
 - **Confidential schedules.** Applicants routinely request confidentiality under NRS 231.069 for detailed
   capital equipment and employment schedules, so the year-by-year build-up behind each headline figure is
   not public.
 - **Resource use per facility.** Only Google publishes facility-level water data for a Nevada site.
+
+## Maps
+
+County boundaries come from the US Census Bureau's public domain cartographic boundary files, filtered to
+Nevada, simplified with Douglas-Peucker at 0.001 degrees and rounded to 4 decimal places. The result is
+committed at `data/geo/nv-counties.geojson` so the build is reproducible offline, and projected at build time
+by `src/lib/geo.ts`.
+
+Two deliberate choices:
+
+- **Albers equal area conic**, standard parallels at 36 and 41 degrees. Equal area matters for a choropleth:
+  an equirectangular projection would stretch Elko and Humboldt relative to Clark and misstate how much of
+  the state each shaded county covers.
+- **Graduated circles over the shading.** Storey County holds the largest share of approved abatement value
+  and is one of the smallest counties in Nevada, rendering roughly 22 times smaller than Clark. A choropleth
+  alone would make the largest figure in the dataset almost invisible, so magnitude is carried by circle
+  area and the shading drops back to context.
+
+Facility dots are placed at county centroids. The state inventory records a county, not a street address,
+and inventing coordinates would imply precision the source does not have. This caveat appears on every map
+that shows dots.
 
 ## Validation
 
@@ -107,5 +128,5 @@ broken "Total Annual Wages" column in the FY2023–24 report was detected. A tes
 - statutory tier consistency (warning)
 - non-primary rows carrying an explanatory note (warning)
 
-`npm run check-sources` separately verifies that every source URL still resolves — government PDFs move
+`npm run check-sources` separately verifies that every source URL still resolves. Government PDFs move
 often, and a citation-based dataset rots silently without this.

@@ -5,7 +5,7 @@
 This project is a static dataset and a static site; it stores no user data, has no accounts, no server-side
 code, and no runtime dependencies. The realistic risk surface is small.
 
-If you find a vulnerability — in the build scripts, the generated site, or the deployment configuration —
+If you find a vulnerability, whether in the build scripts, the generated site or the deployment configuration,
 open a [security advisory](https://github.com/MaxDoubin/nv-datacenter-tracker/security/advisories/new)
 rather than a public issue. Expect a reply within a week.
 

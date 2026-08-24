@@ -6,10 +6,10 @@ configured for.
 
 ## Cloudflare (recommended)
 
-Static asset requests on Cloudflare are **free and unmetered** — there is no bandwidth bill and no request
+Static asset requests on Cloudflare are **free and unmetered**. There is no bandwidth bill and no request
 bill for a site like this. The free plan covers everything here.
 
-### Option A — connect the repository in the dashboard (no secrets, easiest)
+### Option A: connect the repository in the dashboard (no secrets, easiest)
 
 This is the path to take if you just want it live.
 
@@ -18,7 +18,7 @@ This is the path to take if you just want it live.
 3. Set the build configuration:
    - **Build command:** `npm run build`
    - **Build output directory:** `dist`
-   - **Node version:** 24 (set an environment variable `NODE_VERSION` = `24` if the default is older —
+   - **Node version:** 24 (set an environment variable `NODE_VERSION` = `24` if the default is older,
      the build needs Node 23.6+ to run TypeScript directly)
 4. Deploy.
 
@@ -29,7 +29,7 @@ involved, because Cloudflare pulls from GitHub itself.
 **Free plan limits that matter here:** 500 builds/month, 20,000 static asset files per deployment, 25 MiB
 per file. This repository builds to well under 100 files.
 
-### Option B — deploy from GitHub Actions
+### Option B: deploy from GitHub Actions
 
 Use this if you want GitHub to drive deploys. [`deploy-cloudflare.yml`](../.github/workflows/deploy-cloudflare.yml)
 is already written; it validates and tests before publishing, so a bad dataset cannot go live.
@@ -51,7 +51,7 @@ npx wrangler deploy
 ```
 
 [`wrangler.jsonc`](../wrangler.jsonc) declares `dist/` as the asset directory and no Worker script, so
-Cloudflare serves the files straight from its edge. `not_found_handling` is `none` deliberately — the app
+Cloudflare serves the files straight from its edge. `not_found_handling` is `none` deliberately, because the app
 uses hash routing, so every real path is a real file and a miss should be an honest 404 rather than the
 index page. The JSON API depends on that.
 
@@ -65,7 +65,7 @@ content at two independent hosts is cheap insurance.
 
 ## A custom domain
 
-Both hosts take one for free — you pay only for the domain registration.
+Both hosts take one for free. You pay only for the domain registration.
 
 - **Cloudflare:** Workers & Pages → your project → Settings → Domains & Routes → Add. If the domain's DNS is
   already on Cloudflare, TLS is automatic and immediate.
@@ -78,6 +78,6 @@ curl -s https://YOUR-DOMAIN/api/v1/summary.json | head -20
 curl -sI https://YOUR-DOMAIN/api/v1/all.json | grep -i access-control
 ```
 
-The second should show `access-control-allow-origin: *` — [`_headers`](../src/scripts/build.ts) sets CORS on
+The second should show `access-control-allow-origin: *`. [`_headers`](../src/scripts/build.ts) sets CORS on
 `/api/*` so other people can build against the data. Cloudflare and Netlify-style hosts read that file;
 GitHub Pages ignores it, which is one more reason to treat Cloudflare as primary.

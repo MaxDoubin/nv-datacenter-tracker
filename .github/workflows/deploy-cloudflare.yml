@@ -32,7 +32,7 @@ jobs:
             echo "ready=true" >> "$GITHUB_OUTPUT"
           else
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Cloudflare secrets not set — skipping. See docs/DEPLOY.md. GitHub Pages still deploys."
+            echo "::notice::Cloudflare secrets not set, skipping. See docs/DEPLOY.md. GitHub Pages still deploys."
           fi
 
       - if: steps.gate.outputs.ready == 'true'

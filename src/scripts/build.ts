@@ -11,6 +11,7 @@ import { TABLES, num, type Field } from "../lib/schema.ts";
 import {
   toAbatement, totals, groupBy, cumulativeByFiscalYear, deliveryRatios, round4,
 } from "../lib/derive.ts";
+import { projectNevada } from "../lib/geo.ts";
 
 const ROOT = new URL("../../", import.meta.url).pathname;
 const SITE = join(ROOT, "src/site");
@@ -21,7 +22,7 @@ const GENERATED = process.env.BUILD_TIME || new Date().toISOString();
 const { tables, issues } = loadDataset();
 const errors = errorsOf(issues);
 if (errors.length) {
-  console.error("Refusing to build — dataset has errors:\n");
+  console.error("Refusing to build, dataset has errors:\n");
   for (const e of errors) console.error(formatIssue(e));
   process.exit(1);
 }
@@ -36,7 +37,7 @@ const write = (path: string, body: string) => writeFileSync(join(DIST, path), bo
 const json = (path: string, data: unknown) => write(path, JSON.stringify(data, null, 2) + "\n");
 
 dir("api/v1/award");
-dir("data");
+dir("data/geo");
 dir("exports");
 dir("schema");
 
@@ -73,6 +74,9 @@ const summary = {
   })(),
 };
 
+// 460px wide keeps Nevada's tall aspect ratio readable beside a stats panel.
+const geo = projectNevada(join(DATA_DIR, "geo/nv-counties.geojson"), 460);
+
 const rowCounts = Object.fromEntries(TABLES.map((t) => [t.name, tables[t.name].length]));
 const totalRows = Object.values(rowCounts).reduce((a, b) => a + b, 0);
 const meta = { version: VERSION, generated: GENERATED, rowCounts, totalRows, license: { data: "CC-BY-4.0", code: "MIT" } };
@@ -84,7 +88,7 @@ const camel: Record<string, string> = {
   policy_timeline: "policyTimeline",
   accountability_findings: "accountabilityFindings",
 };
-const payload: Record<string, unknown> = { meta, summary, abatements };
+const payload: Record<string, unknown> = { meta, summary, geo, abatements };
 for (const t of TABLES) {
   if (t.name === "abatements") continue;
   payload[camel[t.name] ?? t.name] = tables[t.name];
@@ -93,6 +97,7 @@ for (const t of TABLES) {
 /* ------------------------------------------------------------------- API --- */
 json("api/v1/all.json", payload);
 json("api/v1/summary.json", { meta, ...summary });
+json("api/v1/geo.json", { meta, ...geo });
 json("api/v1/abatements.json", { meta, abatements });
 for (const t of TABLES) {
   if (t.name === "abatements") continue;
@@ -111,6 +116,7 @@ json("api/v1/index.json", {
   meta,
   endpoints: [
     "/api/v1/all.json", "/api/v1/summary.json", "/api/v1/abatements.json",
+    "/api/v1/geo.json",
     ...TABLES.filter((t) => t.name !== "abatements").map((t) => `/api/v1/${t.name}.json`),
     ...abatements.map((a) => `/api/v1/award/${a.id}.json`),
   ],
@@ -118,6 +124,7 @@ json("api/v1/index.json", {
 
 /* --------------------------------------------------------------- exports --- */
 for (const t of TABLES) cpSync(join(DATA_DIR, t.file), join(DIST, "data", t.file));
+cpSync(join(DATA_DIR, "geo/nv-counties.geojson"), join(DIST, "data/geo/nv-counties.geojson"));
 
 json("exports/nv-datacenter-tracker.json", payload);
 write("exports/abatements.jsonl", abatements.map((a) => JSON.stringify(a)).join("\n") + "\n");
@@ -256,9 +263,10 @@ writeFileSync(join(ROOT, "docs/DATA_DICTIONARY.md"), dict + "\n");
 
 /* ---------------------------------------------------------------- report --- */
 const count = (p: string) => readdirSync(join(DIST, p)).length;
-console.log(`Built dist/ — dataset ${VERSION}`);
+console.log(`Built dist/ for dataset ${VERSION}`);
 console.log(`  ${totalRows} rows, ${TABLES.length} tables`);
 console.log(`  api/v1: ${count("api/v1")} files + ${count("api/v1/award")} award records`);
 console.log(`  exports: ${count("exports")} files, schema: ${count("schema")} files`);
+console.log(`  map: ${geo.counties.length} counties projected to ${geo.viewBox}`);
 console.log(`  active awards: ${active.length}, total abatement: $${summary.totals.totalAbatement.toLocaleString("en-US")}`);
 console.log(`  docs/DATA_DICTIONARY.md regenerated`);

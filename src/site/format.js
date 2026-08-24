@@ -1,7 +1,7 @@
 // Formatting helpers shared by every view.
 
 export const fmtUsd = (n, compact = false) => {
-  if (n === null || n === undefined || Number.isNaN(n)) return "—";
+  if (n === null || n === undefined || Number.isNaN(n)) return "n/a";
   if (compact) {
     const a = Math.abs(n);
     if (a >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;
@@ -12,15 +12,15 @@ export const fmtUsd = (n, compact = false) => {
 };
 
 export const fmtNum = (n) =>
-  n === null || n === undefined || Number.isNaN(n) ? "—" : n.toLocaleString("en-US");
+  n === null || n === undefined || Number.isNaN(n) ? "n/a" : n.toLocaleString("en-US");
 
-export const fmtWage = (n) => (n === null || n === undefined ? "—" : `$${Number(n).toFixed(2)}`);
+export const fmtWage = (n) => (n === null || n === undefined ? "n/a" : `$${Number(n).toFixed(2)}`);
 
 export const fmtPct = (n, digits = 0) =>
-  n === null || n === undefined ? "—" : `${(n * 100).toFixed(digits)}%`;
+  n === null || n === undefined ? "n/a" : `${(n * 100).toFixed(digits)}%`;
 
 export const fmtGallons = (n) => {
-  if (n === null || n === undefined) return "—";
+  if (n === null || n === undefined) return "n/a";
   if (n >= 1e9) return `${(n / 1e9).toFixed(2)}B gal`;
   if (n >= 1e6) return `${(n / 1e6).toFixed(1)}M gal`;
   if (n >= 1e3) return `${Math.round(n / 1e3)}K gal`;
@@ -30,13 +30,13 @@ export const fmtGallons = (n) => {
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 export const fmtMonth = (ym) => {
-  if (!ym) return "—";
+  if (!ym) return "n/a";
   const [y, m] = ym.split("-").map(Number);
   return `${MONTHS[m - 1]} ${y}`;
 };
 
 export const fmtDate = (d) => {
-  if (!d) return "—";
+  if (!d) return "n/a";
   const [y, m, day] = d.split("-").map(Number);
   return `${MONTHS[m - 1]} ${day}, ${y}`;
 };

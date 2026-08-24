@@ -19,7 +19,7 @@ is for the record.
 
 **Not accepted:**
 
-- Personal attacks, harassment, or abuse — toward contributors, public officials, or employees of any company
+- Personal attacks, harassment, or abuse, whether toward contributors, public officials, or employees of any company
   in the data.
 - Editing figures to support a conclusion. Changing a number without a source, or removing an inconvenient
   one, is the only thing here that gets an immediate ban.

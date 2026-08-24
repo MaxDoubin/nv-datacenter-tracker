@@ -1,6 +1,6 @@
 {
   // Cloudflare Workers static assets. The site is fully static, so there is no
-  // Worker script — Cloudflare serves dist/ directly from its edge.
+  // Worker script, so Cloudflare serves dist/ directly from its edge.
   // Static asset requests are free and unmetered on the Workers free plan.
   "name": "nv-datacenter-tracker",
   "compatibility_date": "2026-08-01",

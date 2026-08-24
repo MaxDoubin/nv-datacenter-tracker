@@ -21,6 +21,6 @@ if (issues.length) {
 }
 
 const rows = Object.values(tables).reduce((a, t) => a + t.length, 0);
-console.log(`\n${rows} rows across ${TABLES.length} tables — ${errors.length} error(s), ${warnings.length} warning(s)`);
+console.log(`\n${rows} rows across ${TABLES.length} tables, ${errors.length} error(s), ${warnings.length} warning(s)`);
 
 if (errors.length || (strict && warnings.length)) process.exit(1);
