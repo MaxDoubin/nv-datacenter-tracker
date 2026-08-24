@@ -193,7 +193,15 @@ json("datapackage.json", {
   licenses: [
     { name: "CC-BY-4.0", path: "https://creativecommons.org/licenses/by/4.0/", title: "Creative Commons Attribution 4.0" },
   ],
-  resources: TABLES.map((t) => ({
+  resources: [{
+    // The geometry is a first class resource, not a build artefact.
+    name: "nv_counties_geo",
+    path: "data/geo/nv-counties.geojson",
+    format: "geojson",
+    mediatype: "application/geo+json",
+    encoding: "utf-8",
+    description: "Nevada county boundaries, simplified. Projected at build time and served at /api/v1/geo.json.",
+  }, ...TABLES.map((t) => ({
     name: t.name,
     path: `data/${t.file}`,
     format: "csv",
@@ -211,7 +219,7 @@ json("datapackage.json", {
         ...(f.values ? { constraints: { enum: [...f.values] } } : {}),
       })),
     },
-  })),
+  }))],
 });
 
 /* ------------------------------------------------------------------ site --- */
