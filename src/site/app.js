@@ -575,8 +575,8 @@ function discrepancyCards(rows) {
       ${d.subject_id ? `<a class="badge b-accent" href="#/award/${encodeURIComponent(d.subject_id)}">${esc(d.subject_id)}</a>` : ""}
       ${badge(d.resolution === "unresolved" ? "unresolved" : "resolved", d.resolution === "unresolved" ? "warn" : "ok")}</div>
     <div class="table-scroll" style="margin-bottom:10px"><table><tbody>
-      <tr><td class="mono">${esc(d.value_a)}</td><td class="small">${srcShort(d.source_a) || esc(d.source_a)}</td></tr>
-      <tr><td class="mono">${esc(d.value_b)}</td><td class="small">${srcShort(d.source_b) || esc(d.source_b)}</td></tr>
+      <tr><td class="mono wrap-any">${esc(d.value_a)}</td><td class="small wrap-any">${srcShort(d.source_a) || esc(d.source_a)}</td></tr>
+      <tr><td class="mono wrap-any">${esc(d.value_b)}</td><td class="small wrap-any">${srcShort(d.source_b) || esc(d.source_b)}</td></tr>
     </tbody></table></div>
     <p class="small" style="margin:0">${esc(d.notes)}</p>
     <p class="small muted" style="margin:.5em 0 0">${d.resolution === "unresolved"

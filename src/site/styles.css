@@ -82,17 +82,34 @@ code, .mono { font-family: var(--mono); font-size: .9em; }
 .theme-btn { background: var(--surface); border: 1px solid var(--line); color: var(--text-dim); border-radius: 7px; width: 30px; height: 30px; display: grid; place-items: center; cursor: pointer; }
 .theme-btn:hover { color: var(--text); border-color: var(--line-strong); }
 
+/* On narrow screens the eight nav items wrap to three lines and the sticky
+   header swallows half the viewport. Drop the nav to its own row and let it
+   scroll sideways inside itself instead. */
+@media (max-width: 720px) {
+  .topbar-inner { gap: 8px 10px; min-height: 0; padding-top: 8px; padding-bottom: 4px; }
+  .brand { order: 1; }
+  .theme-btn { order: 2; margin-left: auto; flex: none; }
+  .nav {
+    order: 3; width: 100%; margin-left: 0; flex-wrap: nowrap;
+    overflow-x: auto; overscroll-behavior-x: contain;
+    scrollbar-width: none; -ms-overflow-style: none;
+    padding-bottom: 2px;
+  }
+  .nav::-webkit-scrollbar { display: none; }
+}
+
 main { padding: 26px 20px 60px; }
 .loading { color: var(--text-dim); padding: 40px 0; }
 
 /* Cards & stats */
-.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow); min-width: 0; }
 .grid { display: grid; gap: 14px; }
-.stats { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+/* min(Npx, 100%) keeps auto-fit tracks from exceeding a narrow viewport. */
+.stats { grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); }
 .stat .label { font-size: .74rem; text-transform: uppercase; letter-spacing: .07em; color: var(--text-faint); font-weight: 600; }
 .stat .value { font-size: 1.6rem; font-weight: 650; letter-spacing: -.02em; margin-top: 2px; }
 .stat .sub { font-size: .8rem; color: var(--text-dim); margin-top: 2px; }
-.cols-2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.cols-2 { grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); }
 
 .lede { font-size: 1.05rem; color: var(--text-dim); max-width: 68ch; }
 .callout { border-left: 3px solid var(--accent); background: var(--surface); padding: 12px 16px; border-radius: 0 var(--radius) var(--radius) 0; margin: 18px 0; }
@@ -100,7 +117,7 @@ main { padding: 26px 20px 60px; }
 .callout h3 { margin-top: 0; }
 
 /* Tables */
-.table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); min-width: 0; max-width: 100%; }
 table { border-collapse: collapse; width: 100%; font-size: .875rem; }
 th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; white-space: nowrap; }
 thead th { position: sticky; top: 0; background: var(--surface-2); font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text-dim); z-index: 1; }
@@ -144,12 +161,12 @@ input[type="search"] { min-width: 220px; }
 .legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
 
 .bars { display: grid; gap: 7px; }
-.bar-row { display: grid; grid-template-columns: minmax(90px, 26%) 1fr auto; gap: 10px; align-items: center; font-size: .85rem; }
+.bar-row { display: grid; grid-template-columns: minmax(0, 26%) minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: .85rem; }
 .bar-track { display: block; background: var(--surface-2); border-radius: 4px; height: 18px; overflow: hidden; }
 .bar-fill { display: block; height: 100%; border-radius: 4px; background: var(--accent); min-width: 2px; }
 
 /* Definition lists */
-.dl { display: grid; grid-template-columns: minmax(150px, 200px) 1fr; gap: 2px 16px; font-size: .9rem; }
+.dl { display: grid; grid-template-columns: minmax(150px, 200px) minmax(0, 1fr); gap: 2px 16px; font-size: .9rem; }
 .dl dt { color: var(--text-faint); font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; font-weight: 600; padding-top: 4px; }
 .dl dd { margin: 0; padding-top: 2px; }
 @media (max-width: 560px) { .dl { grid-template-columns: 1fr; } .dl dd { margin-bottom: 8px; } }
@@ -158,8 +175,12 @@ input[type="search"] { min-width: 220px; }
 .tag-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 14px; }
 .src { font-size: .8rem; color: var(--text-dim); }
 .empty { padding: 30px; text-align: center; color: var(--text-dim); }
+/* Source titles and mono values can be long and unbroken; let them wrap
+   rather than widening the row. */
+.table-scroll td.wrap-any { white-space: normal; overflow-wrap: anywhere; }
 
-ul.clean { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+ul.clean { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+ul.clean > li { min-width: 0; }
 .timeline { border-left: 2px solid var(--line); padding-left: 18px; display: grid; gap: 18px; margin-left: 6px; }
 .tl-item { position: relative; }
 .tl-item::before { content: ""; position: absolute; left: -25px; top: 6px; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); }
