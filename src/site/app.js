@@ -76,6 +76,25 @@ main.addEventListener("pointerout", (e) => {
 });
 addEventListener("scroll", () => { if (tipEl) hideTip(); }, { passive: true });
 
+/* --------------------------------------------------------- timeline rail --- */
+// The vertical rail on the policy timeline fills in step with how far the
+// reader has scrolled through it, tracking the viewport rather than a fixed
+// duration so it works the same at any scroll speed.
+let timelineRaf = false;
+function updateTimelineFill() {
+  const fill = document.querySelector(".timeline-fill");
+  if (!fill) return;
+  const r = fill.parentElement.getBoundingClientRect();
+  const pct = Math.min(1, Math.max(0, (innerHeight - r.top) / (r.height + innerHeight)));
+  fill.style.height = `${(pct * 100).toFixed(1)}%`;
+}
+addEventListener("scroll", () => {
+  if (timelineRaf) return;
+  timelineRaf = true;
+  requestAnimationFrame(() => { timelineRaf = false; updateTimelineFill(); });
+}, { passive: true });
+addEventListener("resize", updateTimelineFill);
+
 // Scroll-reveal is progressive enhancement over content that already exists in the
 // DOM. If IntersectionObserver is ever unavailable, reveal everything immediately
 // rather than leave data permanently hidden behind a broken animation.
@@ -307,11 +326,13 @@ function viewOverview() {
   const lastExpiry = Math.max(...act.map((a) => a.termEndsFiscalYear ?? 0));
 
   return `
+  <div class="hero">
   <h1>Nevada's data center tax abatements</h1>
   <p class="lede">Since 2015 Nevada has approved <strong>${t.active} data center tax abatements</strong> under
   NRS 360.754, forgoing an estimated <strong>${fmtUsd(t.totalAbatement, true)}</strong> in state and local tax
   revenue in exchange for <strong>${fmtNum(t.jobsPromised)} promised permanent jobs</strong>. Every figure on
   this site links to the document it came from.</p>
+  </div>
 
   <div class="grid stats">
     ${stat("Abatement approved", fmtUsd(t.totalAbatement, true), `${t.active} active, ${t.withdrawn} withdrawn`)}
@@ -535,7 +556,10 @@ function viewAwards(params) {
 
   <form class="controls" id="filters">
     <div class="field"><label for="f-q">Search</label>
-      <input type="search" id="f-q" name="q" value="${esc(params.get("q") || "")}" placeholder="entity, operator, note"></div>
+      <div class="search-wrap">
+        <input type="search" id="f-q" name="q" value="${esc(params.get("q") || "")}" placeholder="entity, operator, note">
+        <button type="button" class="search-clear" aria-label="Clear search"${params.get("q") ? "" : ' hidden'}>&times;</button>
+      </div></div>
     <div class="field"><label for="f-county">County</label><select id="f-county" name="county">${opts(counties, params.get("county") || "")}</select></div>
     <div class="field"><label for="f-company">Operator</label>
       <select id="f-company" name="company"><option value="">All</option>${companies.map((c) =>
@@ -1030,7 +1054,7 @@ function viewTimeline() {
     "The 2015 statute is the whole story: two awards in its first year account for more than half of everything approved since.",
     cumulativeChart(cumulative, (v) => fmtUsd(v, true)))}
 
-  <div class="timeline">${rows.map((e) => `<div class="tl-item">
+  <div class="timeline"><div class="timeline-fill"></div>${rows.map((e) => `<div class="tl-item">
     <div class="tl-date">${fmtDate(e.date)} · ${esc(e.category.replace("-", " "))}
       ${e.verification !== "primary" ? verificationBadge(e.verification) : ""}</div>
     <h3 style="margin:.2em 0">${esc(e.title)}</h3>
@@ -1117,6 +1141,7 @@ function viewAbout() {
 /* ------------------------------------------------------- post-render wiring */
 function afterRender(path, params) {
   wireReveal();
+  updateTimelineFill();
   const form = document.getElementById("filters");
   if (form) {
     const submit = () => {
@@ -1128,9 +1153,19 @@ function afterRender(path, params) {
     form.addEventListener("submit", (e) => { e.preventDefault(); submit(); });
     form.querySelectorAll("select").forEach((el) => el.addEventListener("change", submit));
     let timer;
-    form.querySelector("#f-q")?.addEventListener("input", () => {
+    const qInput = form.querySelector("#f-q");
+    const clearBtn = form.querySelector(".search-clear");
+    qInput?.addEventListener("input", () => {
+      clearBtn.hidden = !qInput.value;
       clearTimeout(timer);
       timer = setTimeout(submit, 220);
+    });
+    clearBtn?.addEventListener("click", () => {
+      qInput.value = "";
+      clearBtn.hidden = true;
+      qInput.focus();
+      clearTimeout(timer);
+      submit();
     });
     form.querySelector("#f-reset")?.addEventListener("click", (e) => {
       e.preventDefault();
