@@ -18,7 +18,63 @@ const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matche
 
 /* -------------------------------------------------------- scroll & motion --- */
 const topbar = document.querySelector(".topbar");
-addEventListener("scroll", () => topbar.classList.toggle("scrolled", scrollY > 4), { passive: true });
+const toTop = document.getElementById("totop");
+addEventListener("scroll", () => {
+  topbar.classList.toggle("scrolled", scrollY > 4);
+  toTop.classList.toggle("show", scrollY > 700);
+}, { passive: true });
+toTop.addEventListener("click", () => scrollTo({ top: 0, behavior: reduceMotion() ? "auto" : "smooth" }));
+
+/* --------------------------------------------------------- chart tooltips --- */
+// Every chart shape carries an SVG <title> for accessibility, but the browser's
+// own hover popup is slow and plain. Show a styled tooltip instead, hiding the
+// native one by detaching its <title> for as long as ours is visible (restored
+// on mouse-out, so keyboard/screen-reader access is untouched).
+const chartTip = document.createElement("div");
+chartTip.className = "chart-tip";
+document.body.appendChild(chartTip);
+let tipEl = null, tipTitle = null;
+
+function findTitle(el) {
+  for (let node = el, depth = 0; node && depth < 4 && !node.classList?.contains("chart"); node = node.parentElement, depth++) {
+    const t = node.querySelector(":scope > title");
+    if (t) return t;
+  }
+  return null;
+}
+function positionTip(x, y) {
+  const pad = 14;
+  chartTip.style.left = "0px"; chartTip.style.top = "0px"; // reset before measuring
+  const r = chartTip.getBoundingClientRect();
+  let left = x + pad, top = y + pad;
+  if (left + r.width > innerWidth - 8) left = x - r.width - pad;
+  if (top + r.height > innerHeight - 8) top = y - r.height - pad;
+  chartTip.style.left = `${Math.max(4, left)}px`;
+  chartTip.style.top = `${Math.max(4, top)}px`;
+}
+function hideTip() {
+  if (tipEl && tipTitle) tipEl.prepend(tipTitle);
+  tipEl = null; tipTitle = null;
+  chartTip.classList.remove("show");
+}
+main.addEventListener("pointerover", (e) => {
+  const el = e.target.closest?.(".chart rect, .chart circle, .chart path, .chart line");
+  if (!el || el === tipEl) return;
+  const title = findTitle(el);
+  if (!title) return;
+  if (tipEl) hideTip();
+  tipEl = el; tipTitle = title;
+  chartTip.textContent = title.textContent;
+  title.remove();
+  chartTip.classList.add("show");
+  positionTip(e.clientX, e.clientY);
+});
+main.addEventListener("pointermove", (e) => { if (tipEl) positionTip(e.clientX, e.clientY); });
+main.addEventListener("pointerout", (e) => {
+  if (tipEl && e.target.closest?.(".chart rect, .chart circle, .chart path, .chart line") === tipEl
+    && !tipEl.contains(e.relatedTarget)) hideTip();
+});
+addEventListener("scroll", () => { if (tipEl) hideTip(); }, { passive: true });
 
 // Scroll-reveal is progressive enhancement over content that already exists in the
 // DOM. If IntersectionObserver is ever unavailable, reveal everything immediately
