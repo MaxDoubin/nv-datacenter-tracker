@@ -191,6 +191,7 @@ function render() {
   for (const [re, fn] of ROUTES) {
     const m = path.match(re);
     if (m) {
+      hideTip(); // never let a stale tooltip from the outgoing page float over the next one
       main.innerHTML = fn(m, params);
       main.classList.remove("page-enter");
       void main.offsetWidth; // restart the entrance animation on every route change
