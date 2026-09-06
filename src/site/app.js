@@ -343,7 +343,7 @@ function viewOverview() {
   </div>
 
   <div class="callout warn">
-    <h3>What the state does not measure</h3>
+    <h2>What the state does not measure</h2>
     <p class="small" style="margin-bottom:.4em">
       ${audited ? `As of ${esc(audited.as_of)}, only <strong>${audited.value} of 13</strong> active data center
       abatements had a completed audit.` : ""}
@@ -1008,7 +1008,7 @@ function viewQuality() {
   </div>
 
   <div class="callout warn">
-    <h3>The largest single finding</h3>
+    <h2>The largest single finding</h2>
     <p class="small" style="margin:0">GOED's FY2023 to FY2024 report to the Legislature places Novva's FY2024
     award in <strong>Clark County</strong> under the entity <strong>Novva Holdings, LLC</strong>. GOED's own
     board packet for the same award, identical to the dollar in both tax figures, describes a
@@ -1055,6 +1055,7 @@ function viewTimeline() {
     "The 2015 statute is the whole story: two awards in its first year account for more than half of everything approved since.",
     cumulativeChart(cumulative, (v) => fmtUsd(v, true)))}
 
+  <h2>Every event, in order</h2>
   <div class="timeline"><div class="timeline-fill"></div>${rows.map((e) => `<div class="tl-item">
     <div class="tl-date">${fmtDate(e.date)} · ${esc(e.category.replace("-", " "))}
       ${e.verification !== "primary" ? verificationBadge(e.verification) : ""}</div>

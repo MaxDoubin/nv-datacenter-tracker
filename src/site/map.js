@@ -89,7 +89,7 @@ export function choropleth(map, values, fmt, opts = {}) {
   if (bubbles) for (const c of withData) radii[c.name] = Math.max(7, Math.sqrt(values[c.name] / max) * 34);
   const dots = markers ? markerDots(map, markers, radii) : "";
 
-  return `<svg class="chart map" viewBox="${map.viewBox}" role="img"
+  return `<svg class="chart map" viewBox="${map.viewBox}" role="group"
     aria-label="Map of Nevada counties shaded by ${esc(label)}">
     ${shapes}${dots}${circles}${labels}
   </svg>`;

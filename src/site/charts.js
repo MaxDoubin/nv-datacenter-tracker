@@ -179,7 +179,7 @@ export function gantt(rows, fmt, opts = {}) {
     return (r.href ? `<a href="${r.href}">${bar}${name}</a>` : bar + name) + amount;
   }).join("");
 
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img"
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="group"
     aria-label="Abatement terms by award, from approval year to expiry">
     <g class="grid">${grid}</g><g>${ticks}</g>${nowLine}${bars}
   </svg>`;
@@ -214,7 +214,7 @@ export function scatter(points, opts = {}) {
     return p.href ? `<a href="${p.href}">${c}</a>` : c;
   }).join("");
 
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img"
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="group"
     aria-label="${esc2(yLabel)} against ${esc2(xLabel)}, bubble area by abatement value">
     <g class="grid">${grid}</g>${dots}
     <g>${yt.map((t) => `<text x="${ml - 8}" y="${py(t) + 4}" text-anchor="end">${esc2(yFmt(t))}</text>`).join("")}
@@ -282,15 +282,16 @@ export function lollipop(items, fmt, opts = {}) {
 
   const body = sorted.map((it, i) => {
     const y = mt + i * rowH + rowH / 2;
+    const tip = `${it.label}: ${fmt(it.value)}${it.note ? ` ${it.note}` : ""}`;
     const dot = `<circle class="dot-pop" style="--i:${i}" cx="${x(it.value)}" cy="${y}" r="6" fill="${palette(i)}"/>`;
-    return `<g><title>${esc2(`${it.label}: ${fmt(it.value)}${it.note ? ` ${it.note}` : ""}`)}</title>
+    return `<g><title>${esc2(tip)}</title>
       <line class="bar-h-line" style="--i:${i}" x1="${ml}" x2="${x(it.value)}" y1="${y}" y2="${y}" stroke="var(--line-strong)" stroke-width="1.5"/>
-      ${it.href ? `<a href="${it.href}">${dot}</a>` : dot}
+      ${it.href ? `<a href="${it.href}" aria-label="${esc2(tip)}">${dot}</a>` : dot}
       <text class="fade-in" style="--i:${i}" x="${ml - 10}" y="${y + 4}" text-anchor="end">${esc2(it.label.slice(0, 30))}</text>
       <text class="fade-in label-strong" style="--i:${i}" x="${W - mr + 8}" y="${y + 4}">${esc2(fmt(it.value))}</text></g>`;
   }).join("");
 
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img"
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="group"
     aria-label="Ranked values">${refLine}${body}</svg>`;
 }
 
@@ -369,7 +370,7 @@ export function treemap(items, fmt) {
     return (b.href ? `<a href="${b.href}">${rect}${text}</a>` : rect + text);
   }).join("");
 
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img"
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="group"
     aria-label="Treemap, area proportional to value">${cells}</svg>`;
 }
 
@@ -403,7 +404,7 @@ export function stackedBars(rows, fmt, opts = {}) {
   const legend = (opts.partLabels ?? []).map((l, j) =>
     `<span><span class="sw" style="background:${palette(j)};opacity:${j === 0 ? 0.9 : 0.6}"></span>${esc2(l)}</span>`).join("");
 
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img"
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="group"
     aria-label="Stacked composition by row">${body}</svg>
     ${legend ? `<div class="legend">${legend}</div>` : ""}`;
 }
@@ -438,7 +439,7 @@ export function proportionalCircles(items, fmt) {
     <text class="fade-in label-strong" style="--i:${i}" x="${d.cx}" y="${baseline + maxR + 32}" text-anchor="middle">${esc2(fmt(d.value))}</text>
   </g>`).join("");
 
-  return `<div class="scroll-x"><svg class="chart" viewBox="0 0 ${Math.max(W, x)} ${H}" role="img"
+  return `<div class="scroll-x" tabindex="0" role="region" aria-label="Circles with area proportional to value, scrollable"><svg class="chart" viewBox="0 0 ${Math.max(W, x)} ${H}" role="img"
     aria-label="Circles with area proportional to value" style="min-width:${Math.max(W, x)}px">${circles}</svg></div>`;
 }
 
@@ -466,7 +467,7 @@ export function heatmap(rowKeys, colKeys, get, fmt, opts = {}) {
   const colLabels = colKeys.map((c, ci) =>
     `<text x="${ml + ci * cell + cell / 2}" y="${mt - 10}" text-anchor="middle">${esc2(String(c).slice(-2))}</text>`).join("");
 
-  return `<div class="scroll-x"><svg class="chart" viewBox="0 0 ${W} ${H}" role="img"
+  return `<div class="scroll-x" tabindex="0" role="region" aria-label="${esc2(opts.title || "Heatmap")}, scrollable"><svg class="chart" viewBox="0 0 ${W} ${H}" role="img"
     aria-label="${esc2(opts.title || "Heatmap")}" style="min-width:${W}px">
     ${cells}<g>${rowLabels}${colLabels}</g></svg></div>`;
 }
