@@ -37,11 +37,11 @@ export function cumulativeChart(series, fmt) {
 
   const cols = series.map((d, i) =>
     d.awarded > 0
-      ? `<rect x="${x(i) - bw / 2}" y="${y(d.awarded)}" width="${bw}" height="${Math.max(1, mt + ih - y(d.awarded))}" rx="2" fill="var(--c2)" opacity=".75"><title>FY${d.fiscalYear}: ${fmt(d.awarded)} approved (${d.awards} award${d.awards === 1 ? "" : "s"})</title></rect>`
+      ? `<rect class="bar-v" style="--i:${i}" x="${x(i) - bw / 2}" y="${y(d.awarded)}" width="${bw}" height="${Math.max(1, mt + ih - y(d.awarded))}" rx="2" fill="var(--c2)" opacity=".75"><title>FY${d.fiscalYear}: ${fmt(d.awarded)} approved (${d.awards} award${d.awards === 1 ? "" : "s"})</title></rect>`
       : "").join("");
 
   const dots = series.map((d, i) =>
-    `<circle cx="${x(i)}" cy="${y(d.cumulative)}" r="3" fill="var(--c1)"><title>FY${d.fiscalYear}: ${fmt(d.cumulative)} cumulative</title></circle>`).join("");
+    `<circle class="dot-pop" style="--i:${i}" cx="${x(i)}" cy="${y(d.cumulative)}" r="3" fill="var(--c1)"><title>FY${d.fiscalYear}: ${fmt(d.cumulative)} cumulative</title></circle>`).join("");
 
   const xLabels = series.map((d, i) =>
     (series.length <= 12 || i % 2 === 0)
@@ -50,8 +50,8 @@ export function cumulativeChart(series, fmt) {
   return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img"
     aria-label="Cumulative approved abatement value by fiscal year, with the amount approved each year">
     <g class="grid">${grid}</g>
-    <path d="${area}" fill="var(--c1)" opacity=".13"/>
-    <path d="${line}" fill="none" stroke="var(--c1)" stroke-width="2"/>
+    <path class="draw-fade" d="${area}" fill="var(--c1)" opacity=".13"/>
+    <path class="line-draw" pathLength="1" d="${line}" fill="none" stroke="var(--c1)" stroke-width="2"/>
     ${cols}${dots}
     <g>${tickLabels}${xLabels}</g>
     <text x="${ml}" y="${H - 10}" text-anchor="middle" opacity="0">FY</text>
@@ -70,7 +70,7 @@ export function barList(items, fmt, opts = {}) {
   return `<div class="bars">${items.map((d, i) => `
     <div class="bar-row">
       <span>${d.href ? `<a href="${d.href}">${d.label}</a>` : d.label}</span>
-      <span class="bar-track"><span class="bar-fill" style="width:${Math.max(1, (d.value / max) * 100)}%;background:${opts.mono ? "var(--accent)" : palette(i)}"></span></span>
+      <span class="bar-track"><span class="bar-fill grow-x" style="--i:${i};width:${Math.max(1, (d.value / max) * 100)}%;background:${opts.mono ? "var(--accent)" : palette(i)}"></span></span>
       <span class="mono faint">${fmt(d.value)}${d.note ? ` <span class="faint">${d.note}</span>` : ""}</span>
     </div>`).join("")}</div>`;
 }
@@ -97,8 +97,8 @@ export function pairedColumns(rows, fmt, labels = ["Projected", "Audited"]) {
     const ratio = d.a ? d.b / d.a : null;
     const tip = `FY${d.label}: ${labels[0]} ${fmt(d.a)}, ${labels[1]} ${fmt(d.b)}${ratio !== null ? ` (${(ratio * 100).toFixed(0)}%)` : ""}`;
     return `<g><title>${tip}</title>
-      <rect x="${cx - bw - 1}" y="${y(d.a)}" width="${bw}" height="${Math.max(1, mt + ih - y(d.a))}" rx="2" fill="var(--c3)" opacity=".55"/>
-      <rect x="${cx + 1}" y="${y(d.b)}" width="${bw}" height="${Math.max(1, mt + ih - y(d.b))}" rx="2" fill="var(--c1)"/>
+      <rect class="bar-v" style="--i:${i * 2}" x="${cx - bw - 1}" y="${y(d.a)}" width="${bw}" height="${Math.max(1, mt + ih - y(d.a))}" rx="2" fill="var(--c3)" opacity=".55"/>
+      <rect class="bar-v" style="--i:${i * 2 + 1}" x="${cx + 1}" y="${y(d.b)}" width="${bw}" height="${Math.max(1, mt + ih - y(d.b))}" rx="2" fill="var(--c1)"/>
     </g>`;
   }).join("");
 
@@ -124,7 +124,7 @@ export function sparkline(values, w = 90, h = 22) {
   const pts = values.map((v, i) =>
     `${(i / Math.max(1, values.length - 1)) * (w - 2) + 1},${h - 1 - ((v - min) / span) * (h - 2)}`).join(" ");
   return `<svg class="chart" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true" style="display:inline-block;vertical-align:middle">
-    <polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+    <polyline class="line-draw" pathLength="1" points="${pts}" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
   </svg>`;
 }
 
@@ -170,12 +170,12 @@ export function gantt(rows, fmt, opts = {}) {
     const w = Math.max(3, x(r.end) - x(r.start));
     const dim = r.status === "withdrawn";
     const tip = `${r.label}: FY${r.start} to FY${r.end}, ${fmt(r.value)}${dim ? " (withdrawn)" : ""}`;
-    const bar = `<rect x="${x(r.start)}" y="${y + 4}" width="${w}" height="${rowH - 9}" rx="3"
+    const bar = `<rect class="bar-h" style="--i:${i}" x="${x(r.start)}" y="${y + 4}" width="${w}" height="${rowH - 9}" rx="3"
         fill="${dim ? "var(--text-faint)" : palette(r.colorIndex ?? i)}"
         opacity="${dim ? 0.35 : 0.85}"><title>${esc2(tip)}</title></rect>`;
-    const name = `<text x="${ml - 10}" y="${y + rowH / 2 + 3}" text-anchor="end"
-        ${dim ? 'style="text-decoration:line-through"' : ""}>${esc2(r.label.slice(0, 28))}</text>`;
-    const amount = `<text x="${x(r.end) + 7}" y="${y + rowH / 2 + 3}" class="label-strong">${esc2(fmt(r.value))}</text>`;
+    const name = `<text class="fade-in" style="--i:${i}${dim ? ";text-decoration:line-through" : ""}"
+        x="${ml - 10}" y="${y + rowH / 2 + 3}" text-anchor="end">${esc2(r.label.slice(0, 28))}</text>`;
+    const amount = `<text class="fade-in label-strong" style="--i:${i}" x="${x(r.end) + 7}" y="${y + rowH / 2 + 3}">${esc2(fmt(r.value))}</text>`;
     return (r.href ? `<a href="${r.href}">${bar}${name}</a>` : bar + name) + amount;
   }).join("");
 
@@ -208,7 +208,7 @@ export function scatter(points, opts = {}) {
   ].join("");
 
   const dots = points.map((p, i) => {
-    const c = `<circle cx="${px(p.x)}" cy="${py(p.y)}" r="${pr(p.r).toFixed(1)}"
+    const c = `<circle class="dot-pop" style="--i:${i}" cx="${px(p.x)}" cy="${py(p.y)}" r="${pr(p.r).toFixed(1)}"
       fill="${palette(i)}" fill-opacity=".55" stroke="${palette(i)}" stroke-width="1.5">
       <title>${esc2(`${p.label}\n${xLabel}: ${xFmt(p.x)}\n${yLabel}: ${yFmt(p.y)}\nabatement: ${rFmt(p.r)}`)}</title></circle>`;
     return p.href ? `<a href="${p.href}">${c}</a>` : c;
@@ -244,12 +244,12 @@ export function dumbbell(rows, fmt, labels = ["projected", "audited"]) {
     const short = ratio !== null && ratio < 1;
     return `<g><title>${esc2(`FY${r.label}: ${labels[0]} ${fmt(r.a)}, ${labels[1]} ${fmt(r.b)}${
       ratio !== null ? ` (${(ratio * 100).toFixed(0)}%)` : ""}`)}</title>
-      <line x1="${x(Math.min(r.a, r.b))}" x2="${x(Math.max(r.a, r.b))}" y1="${y}" y2="${y}"
+      <line class="bar-h-line" style="--i:${i}" x1="${x(Math.min(r.a, r.b))}" x2="${x(Math.max(r.a, r.b))}" y1="${y}" y2="${y}"
         stroke="${short ? "var(--danger)" : "var(--ok)"}" stroke-width="2.5" opacity=".45"/>
-      <circle cx="${x(r.a)}" cy="${y}" r="5" fill="var(--c3)"/>
-      <circle cx="${x(r.b)}" cy="${y}" r="5" fill="var(--c1)"/>
-      <text x="${ml - 10}" y="${y + 4}" text-anchor="end">FY${esc2(r.label)}</text>
-      <text x="${W - mr + 8}" y="${y + 4}" fill="${short ? "var(--danger)" : "var(--ok)"}">${
+      <circle class="dot-pop" style="--i:${i}" cx="${x(r.a)}" cy="${y}" r="5" fill="var(--c3)"/>
+      <circle class="dot-pop" style="--i:${i}" cx="${x(r.b)}" cy="${y}" r="5" fill="var(--c1)"/>
+      <text class="fade-in" style="--i:${i}" x="${ml - 10}" y="${y + 4}" text-anchor="end">FY${esc2(r.label)}</text>
+      <text class="fade-in" style="--i:${i}" x="${W - mr + 8}" y="${y + 4}" fill="${short ? "var(--danger)" : "var(--ok)"}">${
         ratio !== null ? `${(ratio * 100).toFixed(0)}%` : ""}</text>
     </g>`;
   }).join("");
@@ -282,12 +282,12 @@ export function lollipop(items, fmt, opts = {}) {
 
   const body = sorted.map((it, i) => {
     const y = mt + i * rowH + rowH / 2;
-    const dot = `<circle cx="${x(it.value)}" cy="${y}" r="6" fill="${palette(i)}"/>`;
+    const dot = `<circle class="dot-pop" style="--i:${i}" cx="${x(it.value)}" cy="${y}" r="6" fill="${palette(i)}"/>`;
     return `<g><title>${esc2(`${it.label}: ${fmt(it.value)}${it.note ? ` ${it.note}` : ""}`)}</title>
-      <line x1="${ml}" x2="${x(it.value)}" y1="${y}" y2="${y}" stroke="var(--line-strong)" stroke-width="1.5"/>
+      <line class="bar-h-line" style="--i:${i}" x1="${ml}" x2="${x(it.value)}" y1="${y}" y2="${y}" stroke="var(--line-strong)" stroke-width="1.5"/>
       ${it.href ? `<a href="${it.href}">${dot}</a>` : dot}
-      <text x="${ml - 10}" y="${y + 4}" text-anchor="end">${esc2(it.label.slice(0, 30))}</text>
-      <text x="${W - mr + 8}" y="${y + 4}" class="label-strong">${esc2(fmt(it.value))}</text></g>`;
+      <text class="fade-in" style="--i:${i}" x="${ml - 10}" y="${y + 4}" text-anchor="end">${esc2(it.label.slice(0, 30))}</text>
+      <text class="fade-in label-strong" style="--i:${i}" x="${W - mr + 8}" y="${y + 4}">${esc2(fmt(it.value))}</text></g>`;
   }).join("");
 
   return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img"
@@ -308,16 +308,15 @@ export function donut(slices, fmt, opts = {}) {
     const large = sweep > Math.PI ? 1 : 0;
     const p = (rad, a) => `${(cx + rad * Math.cos(a)).toFixed(2)} ${(cy + rad * Math.sin(a)).toFixed(2)}`;
     const d = `M${p(r, a0)}A${r} ${r} 0 ${large} 1 ${p(r, a1)}L${p(ri, a1)}A${ri} ${ri} 0 ${large} 0 ${p(ri, a0)}Z`;
-    return `<path d="${d}" fill="${palette(i)}" stroke="var(--surface)" stroke-width="1.5">
+    return `<path class="arc-in" style="--i:${i}" d="${d}" fill="${palette(i)}" stroke="var(--surface)" stroke-width="1.5">
       <title>${esc2(`${s.label}: ${fmt(s.value)} (${((s.value / total) * 100).toFixed(0)}%)`)}</title></path>`;
   }).join("");
 
   return `<div class="donut-wrap">
     <svg class="chart donut" viewBox="0 0 ${size} ${size}" role="img"
       aria-label="${esc2(opts.title || "Share breakdown")}">${arcs}
-      ${opts.centre ? `<text x="${cx}" y="${cy - 2}" text-anchor="middle" class="label-strong"
-        style="font-size:18px">${esc2(opts.centre)}</text>
-        <text x="${cx}" y="${cy + 15}" text-anchor="middle" style="font-size:10px">${esc2(opts.centreSub || "")}</text>` : ""}
+      ${opts.centre ? `<text x="${cx}" y="${cy - 2}" text-anchor="middle" class="label-strong fade-in" style="--i:${slices.length};font-size:18px">${esc2(opts.centre)}</text>
+        <text x="${cx}" y="${cy + 15}" text-anchor="middle" class="fade-in" style="--i:${slices.length};font-size:10px">${esc2(opts.centreSub || "")}</text>` : ""}
     </svg>
     <div class="legend legend-col">${slices.map((s, i) =>
       `<span><span class="sw" style="background:${palette(i)}"></span>${esc2(s.label)}
@@ -362,11 +361,11 @@ export function treemap(items, fmt) {
   const cells = boxes.map((b, i) => {
     const pct = ((b.value / total) * 100).toFixed(1);
     const showText = b.w > 66 && b.h > 34;
-    const rect = `<rect x="${b.x + 1}" y="${b.y + 1}" width="${Math.max(0, b.w - 2)}" height="${Math.max(0, b.h - 2)}"
+    const rect = `<rect class="cell-in" style="--i:${i}" x="${b.x + 1}" y="${b.y + 1}" width="${Math.max(0, b.w - 2)}" height="${Math.max(0, b.h - 2)}"
       rx="4" fill="${palette(i)}" fill-opacity=".88" stroke="${palette(i)}" stroke-width="1">
       <title>${esc2(`${b.label}: ${fmt(b.value)} (${pct}% of total)`)}</title></rect>`;
-    const text = showText ? `<text x="${b.x + 10}" y="${b.y + 21}" class="tm-label">${esc2(b.label.slice(0, Math.floor(b.w / 7.4))) }</text>
-      <text x="${b.x + 10}" y="${b.y + 37}" class="tm-value">${esc2(fmt(b.value))}</text>` : "";
+    const text = showText ? `<text class="tm-label fade-in" style="--i:${i}" x="${b.x + 10}" y="${b.y + 21}">${esc2(b.label.slice(0, Math.floor(b.w / 7.4))) }</text>
+      <text class="tm-value fade-in" style="--i:${i}" x="${b.x + 10}" y="${b.y + 37}">${esc2(fmt(b.value))}</text>` : "";
     return (b.href ? `<a href="${b.href}">${rect}${text}</a>` : rect + text);
   }).join("");
 
@@ -390,15 +389,15 @@ export function stackedBars(rows, fmt, opts = {}) {
     const total = r.parts.reduce((a, p) => a + p.value, 0);
     const segs = r.parts.map((p, j) => {
       const w = (p.value / max) * iw;
-      const seg = `<rect x="${cursor.toFixed(2)}" y="${y + 5}" width="${Math.max(0, w).toFixed(2)}" height="${rowH - 11}"
+      const seg = `<rect class="bar-h" style="--i:${i}" x="${cursor.toFixed(2)}" y="${y + 5}" width="${Math.max(0, w).toFixed(2)}" height="${rowH - 11}"
         fill="${palette(j)}" fill-opacity="${j === 0 ? 0.9 : 0.6}">
         <title>${esc2(`${r.label}, ${p.label}: ${fmt(p.value)}`)}</title></rect>`;
       cursor += w;
       return seg;
     }).join("");
-    const name = `<text x="${ml - 10}" y="${y + rowH / 2 + 4}" text-anchor="end">${esc2(r.label.slice(0, 30))}</text>`;
+    const name = `<text class="fade-in" style="--i:${i}" x="${ml - 10}" y="${y + rowH / 2 + 4}" text-anchor="end">${esc2(r.label.slice(0, 30))}</text>`;
     return `<g>${r.href ? `<a href="${r.href}">${segs}${name}</a>` : segs + name}
-      <text x="${W - mr + 8}" y="${y + rowH / 2 + 4}" class="label-strong">${esc2(fmt(total))}</text></g>`;
+      <text class="fade-in label-strong" style="--i:${i}" x="${W - mr + 8}" y="${y + rowH / 2 + 4}">${esc2(fmt(total))}</text></g>`;
   }).join("");
 
   const legend = (opts.partLabels ?? []).map((l, j) =>
@@ -433,10 +432,10 @@ export function proportionalCircles(items, fmt) {
 
   const circles = placed.map((d, i) => `<g>
     <title>${esc2(`${d.label}: ${fmt(d.value)}`)}</title>
-    <circle cx="${d.cx}" cy="${baseline}" r="${d.r.toFixed(1)}" fill="${palette(i)}" fill-opacity=".5"
+    <circle class="dot-pop" style="--i:${i}" cx="${d.cx}" cy="${baseline}" r="${d.r.toFixed(1)}" fill="${palette(i)}" fill-opacity=".5"
       stroke="${palette(i)}" stroke-width="1.5"/>
-    <text x="${d.cx}" y="${baseline + maxR + 18}" text-anchor="middle">${esc2(d.label.slice(0, 20))}</text>
-    <text x="${d.cx}" y="${baseline + maxR + 32}" text-anchor="middle" class="label-strong">${esc2(fmt(d.value))}</text>
+    <text class="fade-in" style="--i:${i}" x="${d.cx}" y="${baseline + maxR + 18}" text-anchor="middle">${esc2(d.label.slice(0, 20))}</text>
+    <text class="fade-in label-strong" style="--i:${i}" x="${d.cx}" y="${baseline + maxR + 32}" text-anchor="middle">${esc2(fmt(d.value))}</text>
   </g>`).join("");
 
   return `<div class="scroll-x"><svg class="chart" viewBox="0 0 ${Math.max(W, x)} ${H}" role="img"
@@ -457,7 +456,7 @@ export function heatmap(rowKeys, colKeys, get, fmt, opts = {}) {
     const v = get(r, c);
     const x = ml + ci * cell, y = mt + ri * cell;
     const o = v ? 0.12 + (Math.sqrt(v / max)) * 0.8 : 0;
-    return `<rect x="${x + 1}" y="${y + 1}" width="${cell - 2}" height="${cell - 2}" rx="3"
+    return `<rect class="cell-fade" style="--i:${(ri * colKeys.length + ci) % 30}" x="${x + 1}" y="${y + 1}" width="${cell - 2}" height="${cell - 2}" rx="3"
       fill="${v ? "var(--accent)" : "var(--surface-2)"}" fill-opacity="${v ? o.toFixed(3) : 1}">
       <title>${esc2(`${r}, ${c}: ${v ? fmt(v) : "none"}`)}</title></rect>`;
   })).join("");

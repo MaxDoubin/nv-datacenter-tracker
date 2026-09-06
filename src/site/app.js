@@ -14,6 +14,70 @@ const main = document.getElementById("main");
 let DB = null;
 let FY = 2027;
 
+const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* -------------------------------------------------------- scroll & motion --- */
+const topbar = document.querySelector(".topbar");
+addEventListener("scroll", () => topbar.classList.toggle("scrolled", scrollY > 4), { passive: true });
+
+// Scroll-reveal is progressive enhancement over content that already exists in the
+// DOM. If IntersectionObserver is ever unavailable, reveal everything immediately
+// rather than leave data permanently hidden behind a broken animation.
+const revealObserver = "IntersectionObserver" in window
+  ? new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) {
+          e.target.classList.add("in-view");
+          revealObserver.unobserve(e.target);
+        }
+      }
+    }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" })
+  : { observe: (el) => el.classList.add("in-view") };
+
+/** Animate a formatted stat value ("$1.36B", "13,245", "6.7 to 12%") up from zero. */
+function countUp(el) {
+  if (reduceMotion()) return;
+  const text = el.textContent.trim();
+  const m = text.match(/^(\D*)([\d,]*\.?\d+)(.*)$/);
+  if (!m) return;
+  const [, prefix, numStr, suffix] = m;
+  const target = parseFloat(numStr.replace(/,/g, ""));
+  if (!Number.isFinite(target)) return;
+  const decimals = (numStr.split(".")[1] || "").length;
+  const grouped = numStr.includes(",");
+  const dur = 900, t0 = performance.now();
+  (function frame(t) {
+    const p = Math.min(1, (t - t0) / dur);
+    const eased = 1 - (1 - p) ** 3;
+    const val = target * eased;
+    const numOut = decimals ? val.toFixed(decimals)
+      : grouped ? Math.round(val).toLocaleString("en-US") : String(Math.round(val));
+    el.textContent = `${prefix}${numOut}${suffix}`;
+    if (p < 1) requestAnimationFrame(frame); else el.textContent = text;
+  })(t0);
+}
+const countObserver = "IntersectionObserver" in window
+  ? new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) {
+          countUp(e.target);
+          countObserver.unobserve(e.target);
+        }
+      }
+    }, { threshold: 0.4 })
+  : { observe: () => {} };
+
+/** Stagger cards/figures/list rows in as they scroll into view. */
+function wireReveal() {
+  const els = main.querySelectorAll(".card, figure.fig, .callout, .timeline > .tl-item, ul.clean > li");
+  els.forEach((el, i) => {
+    el.classList.add("reveal");
+    el.style.setProperty("--i", i % 10);
+    revealObserver.observe(el);
+  });
+  main.querySelectorAll(".stat .value").forEach((el) => countObserver.observe(el));
+}
+
 /* ---------------------------------------------------------------- theme --- */
 const savedTheme = localStorage.getItem("theme");
 if (savedTheme) document.documentElement.dataset.theme = savedTheme;
@@ -53,6 +117,9 @@ function render() {
     const m = path.match(re);
     if (m) {
       main.innerHTML = fn(m, params);
+      main.classList.remove("page-enter");
+      void main.offsetWidth; // restart the entrance animation on every route change
+      main.classList.add("page-enter");
       afterRender(path, params);
       const base = "#/" + (path.split("/")[1] || "");
       document.querySelectorAll(".nav a").forEach((a) => {
@@ -993,6 +1060,7 @@ function viewAbout() {
 
 /* ------------------------------------------------------- post-render wiring */
 function afterRender(path, params) {
+  wireReveal();
   const form = document.getElementById("filters");
   if (form) {
     const submit = () => {
