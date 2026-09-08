@@ -3,6 +3,57 @@
 Versioned so that a citation to a figure stays reproducible. Data changes are called out separately from
 code changes, because a changed number matters more than a changed function.
 
+## 1.2.0 (2026-09-08)
+
+Motion release. The dataset is unchanged; everything else is presentation and accessibility.
+
+### Code
+
+- Every hand-rolled SVG chart (bar/column, gantt, scatter, dumbbell, lollipop, donut, treemap, heatmap,
+  proportional circles, choropleth map) now draws itself in on mount: bars grow, dots pop, arcs sweep, lines
+  trace via a `pathLength="1"` stroke-dashoffset trick, staggered per element with a small `--i` CSS custom
+  property set in `charts.js`/`map.js`.
+- Cards, figures, callouts, timeline entries and list rows fade and lift into view on scroll via
+  `IntersectionObserver`; the headline `.stat .value` numbers count up from zero the first time they scroll
+  into view, preserving their original formatting.
+- A custom styled tooltip replaces the browser's slow native SVG `<title>` popup on every chart, detaching the
+  `<title>` node while visible (screen-reader access is unaffected) and restoring it on mouse-out or route
+  change.
+- Route changes fade and lift `#main`; the sticky header gains a shadow on scroll; the theme toggle icon
+  rotates; the search field on Awards gets a clear button; the policy timeline gets a rail that fills with how
+  far the reader has scrolled through it; the overview headline gets a quiet radial glow; a back-to-top
+  control appears after scrolling; the light/dark toggle crossfades instead of snapping.
+- The "Loading dataset…" placeholder is a shimmering skeleton that mirrors the overview layout.
+- All of the above lives inside `@media (prefers-reduced-motion: no-preference)`; a `reduce` block forces
+  every animated or revealed element to its final visible state regardless of JS, `@media print` does the
+  same for export, and `IntersectionObserver` use is feature-detected with an immediate-reveal fallback, so
+  visibility never depends on an animation completing.
+
+### Fixed
+
+- `--text-faint` fell short of WCAG AA contrast (4.5:1) against the page background almost everywhere it was
+  used — stat labels, figure sources, field labels, timeline dates. Darkened it in light mode and lightened it
+  in dark mode; verified against both `--bg` and `--surface`.
+- The lollipop chart's clickable dots had no accessible name: the descriptive text lived on a sibling
+  `<title>`, not inside the `<a>` itself. Added `aria-label` with the same text.
+- Five chart types (gantt, scatter, lollipop, treemap, stacked bars) and the choropleth map declared
+  `role="img"` — "this is one flat, non-interactive picture" — while containing real `<a href>` links, a
+  direct ARIA contradiction. Switched those five to `role="group"`, which permits a label and real
+  interactive descendants; chart types that never render links keep `role="img"`.
+- Two "callout" boxes used `<h3>` directly after `<h1>` with no `<h2>` between (Overview, Data quality);
+  promoted them to `<h2>` with a CSS override so their visual size is unchanged. The policy timeline had no
+  heading above `<h1>` at all before its per-entry `<h3>`s; added a visible "Every event, in order" `<h2>`.
+- The two horizontally-scrolling chart wrappers (proportional circles, heatmap) weren't keyboard-focusable;
+  added `tabindex="0"` and a `role="region"` label.
+- A stale chart tooltip could survive a route change, left floating over the next page with the previous
+  page's text, if the user clicked a linked chart shape while hovering it.
+- The search-clear button on Awards showed even with an empty search box, on every load: its own `display`
+  declaration overrode the `[hidden]` attribute meant to hide it (author CSS beats the UA stylesheet on a
+  specificity tie) — the same class of bug already caught once on the back-to-top control.
+
+All found via an axe-core audit run across every route in both themes; confirmed against a worktree of the
+prior commit that every violation predated this release, then fixed the ones with a safe, high-confidence fix.
+
 ## 1.1.0 (2026-08-24)
 
 Visual release. The dataset is unchanged apart from one added source; everything else is presentation.
