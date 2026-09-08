@@ -46,7 +46,7 @@ export function choropleth(map, values, fmt, opts = {}) {
   // choropleth alone makes the biggest number nearly invisible.
   const fillCeiling = bubbles ? 0.45 : 1;
 
-  const shapes = map.counties.map((c) => {
+  const shapes = map.counties.map((c, i) => {
     const v = values[c.name] ?? 0;
     const o = scale.step(v) * fillCeiling;
     const tip = `${c.name} County: ${v ? fmt(v) : `no ${label}`}${detail[c.name] ? `\n${detail[c.name]}` : ""}`;
@@ -55,7 +55,7 @@ export function choropleth(map, values, fmt, opts = {}) {
     const stroke = v
       ? `stroke="var(--accent)" stroke-width="1.6"`
       : `stroke="var(--bg)" stroke-width="1.1"`;
-    const inner = `<path d="${c.path}" ${fill} ${stroke}><title>${esc(tip)}</title></path>`;
+    const inner = `<path class="cty-path" style="--i:${i}" d="${c.path}" ${fill} ${stroke}><title>${esc(tip)}</title></path>`;
     return v
       ? `<a href="${hrefBase}${encodeURIComponent(c.name)}" aria-label="${esc(tip)}">${inner}</a>`
       : `<g aria-label="${esc(tip)}">${inner}</g>`;
@@ -63,13 +63,13 @@ export function choropleth(map, values, fmt, opts = {}) {
 
   const withData = map.counties.filter((c) => values[c.name]);
 
-  const circles = bubbles ? withData.map((c) => {
+  const circles = bubbles ? withData.map((c, i) => {
     const v = values[c.name];
     const r = Math.max(7, Math.sqrt(v / max) * 34);
     const [x, y] = c.centroid;
     const tip = `${c.name} County: ${fmt(v)}${detail[c.name] ? `\n${detail[c.name]}` : ""}`;
     return `<a href="${hrefBase}${encodeURIComponent(c.name)}" aria-label="${esc(tip)}">
-      <circle cx="${x}" cy="${y}" r="${r.toFixed(1)}" fill="var(--accent)" fill-opacity=".95"
+      <circle class="map-bubble" style="--i:${i}" cx="${x}" cy="${y}" r="${r.toFixed(1)}" fill="var(--accent)" fill-opacity=".95"
         stroke="var(--surface)" stroke-width="2"><title>${esc(tip)}</title></circle>
       <text x="${x}" y="${y + 4}" text-anchor="middle" class="map-bubble-value">${esc(fmt(v))}</text>
     </a>`;
@@ -89,7 +89,7 @@ export function choropleth(map, values, fmt, opts = {}) {
   if (bubbles) for (const c of withData) radii[c.name] = Math.max(7, Math.sqrt(values[c.name] / max) * 34);
   const dots = markers ? markerDots(map, markers, radii) : "";
 
-  return `<svg class="chart map" viewBox="${map.viewBox}" role="img"
+  return `<svg class="chart map" viewBox="${map.viewBox}" role="group"
     aria-label="Map of Nevada counties shaded by ${esc(label)}">
     ${shapes}${dots}${circles}${labels}
   </svg>`;
@@ -121,7 +121,7 @@ function markerDots(map, facilities, radii = {}) {
       const y = cy + offset + Math.floor(i / cols) * gap;
       const colour = f.status === "operational" ? "var(--ok)"
         : f.status === "planned" ? "var(--warn)" : "var(--text-faint)";
-      return `<circle cx="${x}" cy="${y}" r="3.4" fill="${colour}" stroke="var(--bg)" stroke-width="1">
+      return `<circle class="map-dot" style="--i:${i % 14}" cx="${x}" cy="${y}" r="3.4" fill="${colour}" stroke="var(--bg)" stroke-width="1">
         <title>${esc(`${f.company}, ${county} County (${f.status})`)}</title></circle>`;
     }).join("");
   }).join("");

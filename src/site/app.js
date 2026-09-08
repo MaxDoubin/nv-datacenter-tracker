@@ -14,6 +14,145 @@ const main = document.getElementById("main");
 let DB = null;
 let FY = 2027;
 
+const reduceMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* -------------------------------------------------------- scroll & motion --- */
+const topbar = document.querySelector(".topbar");
+const toTop = document.getElementById("totop");
+addEventListener("scroll", () => {
+  topbar.classList.toggle("scrolled", scrollY > 4);
+  toTop.classList.toggle("show", scrollY > 700);
+}, { passive: true });
+toTop.addEventListener("click", () => scrollTo({ top: 0, behavior: reduceMotion() ? "auto" : "smooth" }));
+
+/* --------------------------------------------------------- chart tooltips --- */
+// Every chart shape carries an SVG <title> for accessibility, but the browser's
+// own hover popup is slow and plain. Show a styled tooltip instead, hiding the
+// native one by detaching its <title> for as long as ours is visible (restored
+// on mouse-out, so keyboard/screen-reader access is untouched).
+const chartTip = document.createElement("div");
+chartTip.className = "chart-tip";
+document.body.appendChild(chartTip);
+let tipEl = null, tipTitle = null;
+
+function findTitle(el) {
+  for (let node = el, depth = 0; node && depth < 4 && !node.classList?.contains("chart"); node = node.parentElement, depth++) {
+    const t = node.querySelector(":scope > title");
+    if (t) return t;
+  }
+  return null;
+}
+function positionTip(x, y) {
+  const pad = 14;
+  chartTip.style.left = "0px"; chartTip.style.top = "0px"; // reset before measuring
+  const r = chartTip.getBoundingClientRect();
+  let left = x + pad, top = y + pad;
+  if (left + r.width > innerWidth - 8) left = x - r.width - pad;
+  if (top + r.height > innerHeight - 8) top = y - r.height - pad;
+  chartTip.style.left = `${Math.max(4, left)}px`;
+  chartTip.style.top = `${Math.max(4, top)}px`;
+}
+function hideTip() {
+  if (tipEl && tipTitle) tipEl.prepend(tipTitle);
+  tipEl = null; tipTitle = null;
+  chartTip.classList.remove("show");
+}
+main.addEventListener("pointerover", (e) => {
+  const el = e.target.closest?.(".chart rect, .chart circle, .chart path, .chart line");
+  if (!el || el === tipEl) return;
+  const title = findTitle(el);
+  if (!title) return;
+  if (tipEl) hideTip();
+  tipEl = el; tipTitle = title;
+  chartTip.textContent = title.textContent;
+  title.remove();
+  chartTip.classList.add("show");
+  positionTip(e.clientX, e.clientY);
+});
+main.addEventListener("pointermove", (e) => { if (tipEl) positionTip(e.clientX, e.clientY); });
+main.addEventListener("pointerout", (e) => {
+  if (tipEl && e.target.closest?.(".chart rect, .chart circle, .chart path, .chart line") === tipEl
+    && !tipEl.contains(e.relatedTarget)) hideTip();
+});
+addEventListener("scroll", () => { if (tipEl) hideTip(); }, { passive: true });
+
+/* --------------------------------------------------------- timeline rail --- */
+// The vertical rail on the policy timeline fills in step with how far the
+// reader has scrolled through it, tracking the viewport rather than a fixed
+// duration so it works the same at any scroll speed.
+let timelineRaf = false;
+function updateTimelineFill() {
+  const fill = document.querySelector(".timeline-fill");
+  if (!fill) return;
+  const r = fill.parentElement.getBoundingClientRect();
+  const pct = Math.min(1, Math.max(0, (innerHeight - r.top) / (r.height + innerHeight)));
+  fill.style.height = `${(pct * 100).toFixed(1)}%`;
+}
+addEventListener("scroll", () => {
+  if (timelineRaf) return;
+  timelineRaf = true;
+  requestAnimationFrame(() => { timelineRaf = false; updateTimelineFill(); });
+}, { passive: true });
+addEventListener("resize", updateTimelineFill);
+
+// Scroll-reveal is progressive enhancement over content that already exists in the
+// DOM. If IntersectionObserver is ever unavailable, reveal everything immediately
+// rather than leave data permanently hidden behind a broken animation.
+const revealObserver = "IntersectionObserver" in window
+  ? new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) {
+          e.target.classList.add("in-view");
+          revealObserver.unobserve(e.target);
+        }
+      }
+    }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" })
+  : { observe: (el) => el.classList.add("in-view") };
+
+/** Animate a formatted stat value ("$1.36B", "13,245", "6.7 to 12%") up from zero. */
+function countUp(el) {
+  if (reduceMotion()) return;
+  const text = el.textContent.trim();
+  const m = text.match(/^(\D*)([\d,]*\.?\d+)(.*)$/);
+  if (!m) return;
+  const [, prefix, numStr, suffix] = m;
+  const target = parseFloat(numStr.replace(/,/g, ""));
+  if (!Number.isFinite(target)) return;
+  const decimals = (numStr.split(".")[1] || "").length;
+  const grouped = numStr.includes(",");
+  const dur = 900, t0 = performance.now();
+  (function frame(t) {
+    const p = Math.min(1, (t - t0) / dur);
+    const eased = 1 - (1 - p) ** 3;
+    const val = target * eased;
+    const numOut = decimals ? val.toFixed(decimals)
+      : grouped ? Math.round(val).toLocaleString("en-US") : String(Math.round(val));
+    el.textContent = `${prefix}${numOut}${suffix}`;
+    if (p < 1) requestAnimationFrame(frame); else el.textContent = text;
+  })(t0);
+}
+const countObserver = "IntersectionObserver" in window
+  ? new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) {
+          countUp(e.target);
+          countObserver.unobserve(e.target);
+        }
+      }
+    }, { threshold: 0.4 })
+  : { observe: () => {} };
+
+/** Stagger cards/figures/list rows in as they scroll into view. */
+function wireReveal() {
+  const els = main.querySelectorAll(".card, figure.fig, .callout, .timeline > .tl-item, ul.clean > li");
+  els.forEach((el, i) => {
+    el.classList.add("reveal");
+    el.style.setProperty("--i", i % 10);
+    revealObserver.observe(el);
+  });
+  main.querySelectorAll(".stat .value").forEach((el) => countObserver.observe(el));
+}
+
 /* ---------------------------------------------------------------- theme --- */
 const savedTheme = localStorage.getItem("theme");
 if (savedTheme) document.documentElement.dataset.theme = savedTheme;
@@ -52,7 +191,11 @@ function render() {
   for (const [re, fn] of ROUTES) {
     const m = path.match(re);
     if (m) {
+      hideTip(); // never let a stale tooltip from the outgoing page float over the next one
       main.innerHTML = fn(m, params);
+      main.classList.remove("page-enter");
+      void main.offsetWidth; // restart the entrance animation on every route change
+      main.classList.add("page-enter");
       afterRender(path, params);
       const base = "#/" + (path.split("/")[1] || "");
       document.querySelectorAll(".nav a").forEach((a) => {
@@ -184,11 +327,13 @@ function viewOverview() {
   const lastExpiry = Math.max(...act.map((a) => a.termEndsFiscalYear ?? 0));
 
   return `
+  <div class="hero">
   <h1>Nevada's data center tax abatements</h1>
   <p class="lede">Since 2015 Nevada has approved <strong>${t.active} data center tax abatements</strong> under
   NRS 360.754, forgoing an estimated <strong>${fmtUsd(t.totalAbatement, true)}</strong> in state and local tax
   revenue in exchange for <strong>${fmtNum(t.jobsPromised)} promised permanent jobs</strong>. Every figure on
   this site links to the document it came from.</p>
+  </div>
 
   <div class="grid stats">
     ${stat("Abatement approved", fmtUsd(t.totalAbatement, true), `${t.active} active, ${t.withdrawn} withdrawn`)}
@@ -198,7 +343,7 @@ function viewOverview() {
   </div>
 
   <div class="callout warn">
-    <h3>What the state does not measure</h3>
+    <h2>What the state does not measure</h2>
     <p class="small" style="margin-bottom:.4em">
       ${audited ? `As of ${esc(audited.as_of)}, only <strong>${audited.value} of 13</strong> active data center
       abatements had a completed audit.` : ""}
@@ -412,7 +557,10 @@ function viewAwards(params) {
 
   <form class="controls" id="filters">
     <div class="field"><label for="f-q">Search</label>
-      <input type="search" id="f-q" name="q" value="${esc(params.get("q") || "")}" placeholder="entity, operator, note"></div>
+      <div class="search-wrap">
+        <input type="search" id="f-q" name="q" value="${esc(params.get("q") || "")}" placeholder="entity, operator, note">
+        <button type="button" class="search-clear" aria-label="Clear search"${params.get("q") ? "" : ' hidden'}>&times;</button>
+      </div></div>
     <div class="field"><label for="f-county">County</label><select id="f-county" name="county">${opts(counties, params.get("county") || "")}</select></div>
     <div class="field"><label for="f-company">Operator</label>
       <select id="f-company" name="company"><option value="">All</option>${companies.map((c) =>
@@ -860,7 +1008,7 @@ function viewQuality() {
   </div>
 
   <div class="callout warn">
-    <h3>The largest single finding</h3>
+    <h2>The largest single finding</h2>
     <p class="small" style="margin:0">GOED's FY2023 to FY2024 report to the Legislature places Novva's FY2024
     award in <strong>Clark County</strong> under the entity <strong>Novva Holdings, LLC</strong>. GOED's own
     board packet for the same award, identical to the dollar in both tax figures, describes a
@@ -907,7 +1055,8 @@ function viewTimeline() {
     "The 2015 statute is the whole story: two awards in its first year account for more than half of everything approved since.",
     cumulativeChart(cumulative, (v) => fmtUsd(v, true)))}
 
-  <div class="timeline">${rows.map((e) => `<div class="tl-item">
+  <h2>Every event, in order</h2>
+  <div class="timeline"><div class="timeline-fill"></div>${rows.map((e) => `<div class="tl-item">
     <div class="tl-date">${fmtDate(e.date)} · ${esc(e.category.replace("-", " "))}
       ${e.verification !== "primary" ? verificationBadge(e.verification) : ""}</div>
     <h3 style="margin:.2em 0">${esc(e.title)}</h3>
@@ -993,6 +1142,8 @@ function viewAbout() {
 
 /* ------------------------------------------------------- post-render wiring */
 function afterRender(path, params) {
+  wireReveal();
+  updateTimelineFill();
   const form = document.getElementById("filters");
   if (form) {
     const submit = () => {
@@ -1004,9 +1155,19 @@ function afterRender(path, params) {
     form.addEventListener("submit", (e) => { e.preventDefault(); submit(); });
     form.querySelectorAll("select").forEach((el) => el.addEventListener("change", submit));
     let timer;
-    form.querySelector("#f-q")?.addEventListener("input", () => {
+    const qInput = form.querySelector("#f-q");
+    const clearBtn = form.querySelector(".search-clear");
+    qInput?.addEventListener("input", () => {
+      clearBtn.hidden = !qInput.value;
       clearTimeout(timer);
       timer = setTimeout(submit, 220);
+    });
+    clearBtn?.addEventListener("click", () => {
+      qInput.value = "";
+      clearBtn.hidden = true;
+      qInput.focus();
+      clearTimeout(timer);
+      submit();
     });
     form.querySelector("#f-reset")?.addEventListener("click", (e) => {
       e.preventDefault();

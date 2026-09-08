@@ -42,7 +42,16 @@
   </div>
 </header>
 
-<main id="main" class="wrap"><div class="loading">Loading dataset…</div></main>
+<main id="main" class="wrap"><div class="loading">
+  <div class="skel">
+    <div class="skel-line h1"></div>
+    <div class="skel-line lede"></div>
+    <div class="skel-line lede2"></div>
+  </div>
+  <div class="skel-stats">
+    <div class="skel-card"></div><div class="skel-card"></div><div class="skel-card"></div><div class="skel-card"></div>
+  </div>
+</div></main>
 
 <footer class="footer">
   <div class="wrap">
@@ -51,6 +60,12 @@
     <p id="build-stamp" class="muted"></p>
   </div>
 </footer>
+
+<button id="totop" class="to-top" type="button" aria-label="Back to top" title="Back to top">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M6 14l6-6 6 6"/>
+  </svg>
+</button>
 
 <script type="module" src="./app.js"></script>
 </body>
